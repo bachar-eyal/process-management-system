@@ -29,4 +29,4 @@ A robust, full-stack desktop and web application built with Python, JavaScript, 
 git clone https://github.com/bachar-eyal/process-management-system.git
 
 2. Run the application:
-python main.py
+python app.py
