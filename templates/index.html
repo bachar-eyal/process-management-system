@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<style>
+/* Google Fonts - Dancing Script - הורד מקומי */
+@font-face {
+    font-family: 'Dancing Script';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/static/fonts/DancingScript-Regular.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Dancing Script';
+    font-style: normal;
+    font-weight: 600;
+    src: url('/static/fonts/DancingScript-SemiBold.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Dancing Script';
+    font-style: normal;
+    font-weight: 700;
+    src: url('/static/fonts/DancingScript-Bold.woff2') format('woff2');
+}
+.settings-dropdown {
+    position: relative;
+}
+
+.settings-dropdown .btn {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.settings-dropdown .btn:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #343a40 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0,0,0,0.25);
+}
+
+.settings-dropdown .dropdown-menu {
+    border: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    margin-top: 8px;
+    padding: 8px 0;
+    min-width: 220px;
+    text-align: right;
+    direction: rtl;
+}
+
+.settings-dropdown .dropdown-item {
+    padding: 12px 18px;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin: 2px 8px;
+    font-weight: 500;
+    color: #495057;
+    text-align: right;
+    direction: rtl;
+}
+
+.settings-dropdown .dropdown-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transform: translateX(-3px);
+    color: #212529;
+    text-decoration: none;
+}
+
+.settings-dropdown .dropdown-item i {
+    width: 18px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.settings-dropdown .dropdown-item:hover i {
+    color: #495057;
+}
+
+.qr-button {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.qr-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.dark-mode-toggle {
+    background: none;
+    border: none;
+    color: #1976d2;
+    font-size: 1.7rem;
+    cursor: pointer;
+    margin-left: 18px;
+    transition: color 0.3s;
+}
+.dark-mode-toggle:hover {
+    color: #ffb300;
+}
+.equal-width-btn {
+    min-width: 180px;
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div style="text-align: center; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative;">
+        <!-- לוגו בפינה הימנית העליונה -->
+        <div style="position: absolute; top: 10px; right: 20px; width: 50px; height: 50px;">
+            <img src="/static/logo_108.png" alt="לוגו" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        </div>
+        
+        <div style="flex: 1;"></div>
+        <h1 style="margin: 0; flex: 2; text-align: center; font-family: 'Dancing Script', cursive; font-size: 2.8rem; color: #2c3e50; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); font-weight: 700;">ניהול תגי תהליך</h1>
+        <div style="flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 20px;">
+            <a href="{{ url_for('generate_qr') }}" class="qr-button">
+                <img src="/static/QR_image.png" alt="צור QR" style="width: 50px; height: 80px; object-fit: contain;">
+            </a>
+        </div>
+    </div>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+    <form method="POST" action="{{ url_for('main_index') }}">
+        <div class="form-group">
+            <label>מספר סידורי:</label>
+            <input type="text" class="form-control" name="qr_code" placeholder="סרוק QR או הכנס מספר סידורי" value="{{ qr_code if qr_code else '' }}" autofocus>
+        </div>
+        <div class="form-group">
+            <label>מק"ט:</label>
+            <input type="text" class="form-control" name="sku" list="sku-options" placeholder="הזן מקט או תיאור" value="{{ sku if sku else '' }}">
+            <datalist id="sku-options">
+                {% for sku_code, description in approved_skus %}
+                <option value="{{ sku_code }}">{{ description if description else 'ללא תיאור' }}</option>
+                {% endfor %}
+            </datalist>
+            <div class="error-message" id="sku-error">המק"ט לא קיים במערכת</div>
+        </div>
+        <button type="submit" name="action" value="search" class="btn btn-primary equal-width-btn">יצירה/חיפוש מוצר</button>
+        <button type="submit" name="action" value="close" class="btn btn-danger equal-width-btn">סגירת פריט</button>
+    </form>
+    <a href="{{ url_for('open_tags') }}" class="btn btn-view-tags mt-3 equal-width-btn">צפייה בתגי תהליך</a>
+    <a href="{{ url_for('report') }}" class="btn btn-view-report mt-3 equal-width-btn">צפה בדוח סטטוס</a>
+</div>
+<footer style="margin-top: 60px; padding: 20px; border-top: 1px solid #ccc; text-align: center; animation: fadein 2s ease;">
+  <p style="font-family: 'Palace Script MT', cursive; font-size: 20px; color: #666; margin: 0;">
+    פותח ועוצב על ידי
+    <span style="margin-right: 12px; font-size: 30px; font-weight: bold; color: #222;">Eyal Bachar</span>
+  </p>
+</footer>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/index.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const skuInput = document.querySelector('input[name="sku"]');
+    
+    // הסר את הפילטור המותאם אישית - תן לדפדפן לטפל בזה
+    // זה יפתור את הבעיה עם מק"טים כמו "12" שמסתירים "1" ו"2"
+    
+    // הוסף debug logging
+    skuInput.addEventListener('change', function() {
+        console.log('SKU input changed to:', this.value);
+    });
+    
+    skuInput.addEventListener('input', function() {
+        console.log('SKU input value:', this.value);
+    });
+});
+</script>
+{% endblock %}

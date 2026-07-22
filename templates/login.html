@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>התחברות - {{ team_name }}</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/fontawesome.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px 30px 30px 30px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 1s;
+        }
+        .login-container:before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 120px;
+            height: 120px;
+            background: #6366f1;
+            border-radius: 50%;
+            opacity: 0.15;
+            z-index: 0;
+        }
+        .login-icon {
+            font-size: 3rem;
+            color: #6366f1;
+            display: block;
+            margin: 0 auto 18px auto;
+            animation: bounceIn 1s;
+        }
+        h2 {
+            text-align: center;
+            color: #22223b;
+            margin-bottom: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .team-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .team-info h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+        .team-info p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        .form-label {
+            color: #6366f1;
+            font-weight: 500;
+        }
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #c7d2fe;
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
+        .form-control:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px #a5b4fc55;
+        }
+        .btn-login {
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #6366f133;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+        .btn-login:hover {
+            background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .btn-back {
+            background: #6c757d;
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #6c757d33;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn-back:hover {
+            background: #5a6268;
+            transform: translateY(-2px) scale(1.03);
+            color: #fff;
+        }
+        .alert {
+            text-align: center;
+            font-size: 1rem;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <span class="login-icon"><i class="fas fa-user-lock"></i></span>
+        
+        <!-- מידע על הצוות -->
+        <div class="team-info">
+            <h4><i class="fas fa-users"></i> {{ team_name }}</h4>
+            <p>התחבר לצוות שלך</p>
+        </div>
+        
+        {% if error %}
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="username" class="form-label">
+                    <i class="fas fa-user"></i> שם משתמש
+                </label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <i class="fas fa-lock"></i> סיסמה
+                </label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-login btn-block">
+                <i class="fas fa-sign-in-alt"></i> התחבר
+            </button>
+        </form>
+        
+        <a href="{{ url_for('team_selection') }}" class="btn btn-back">
+            <i class="fas fa-arrow-right"></i> חזור לבחירת צוות
+        </a>
+    </div>
+</body>
+</html> 

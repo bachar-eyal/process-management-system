@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/datatables.min.css">
+<!-- Google Fonts - Roboto - הורד מקומי -->
+<style>
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/static/fonts/Roboto-Regular.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 700;
+    src: url('/static/fonts/Roboto-Bold.woff2') format('woff2');
+}
+</style>
+<link rel="stylesheet" href="/static/css/report.css">
+<style>
+.summary-box {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 32px;
+}
+.summary-item {
+    background: #f8fcff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(25,118,210,0.07);
+    padding: 24px 32px 18px 32px;
+    min-width: 180px;
+    text-align: center;
+    position: relative;
+}
+.summary-item .main-value {
+    font-size: 2.7rem;
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 0.2em;
+}
+.summary-item .label {
+    font-size: 1.1rem;
+    color: #1a2e44;
+    font-weight: 500;
+    margin-bottom: 0.5em;
+}
+.summary-item .compare {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    font-size: 1.1rem;
+    color: #888;
+    text-align: right;
+}
+.summary-item .compare .prev-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #b71c1c;
+}
+.summary-item .compare .prev-label {
+    font-size: 0.95rem;
+    color: #888;
+}
+.percent-diff {
+    margin-top: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+@media (max-width: 900px) {
+    .summary-box { flex-direction: column; align-items: center; gap: 18px; }
+    .summary-item { min-width: 0; width: 100%; }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <a href="{{ url_for('main_index') }}" class="btn btn-secondary mb-3">חזור לעמוד הראשי</a>
+    <div style="text-align: center;">
+        <h1 class="mt-4" style="color: #1a2e44; font-weight: 700; text-transform: uppercase;">סטטוס עדכני – {{ current_month_name }} {{ current_year }}</h1>
+    </div>
+    <br>
+    <div class="summary-box">
+        <div class="summary-item clickable-summary" id="open-summary">
+            <div class="label" style="font-size: 1.2rem; color: #1a2e44; font-weight: 700; margin-bottom: 12px;">סה"כ פתוחים</div>
+            <div style="display: flex; align-items: flex-start; justify-content: center; gap: 32px;">
+                <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
+                    <span style="font-size: 1.3rem; color: #888; font-weight: 600;">{{ total_open_prev }}</span>
+                    <span style="font-size: 1rem; color: #bbb;">{{ prev_month_name }}</span>
+                </div>
+                <div style="font-size: 3.2rem; font-weight: bold; color: #1976d2; min-width: 60px; text-align: center;">{{ total_open_current }}</div>
+            </div>
+            <div class="percent-diff" id="open-diff" style="display:none; margin-top: 10px;"></div>
+        </div>
+        <div class="summary-item clickable-summary" id="closed-summary">
+            <div class="label" style="font-size: 1.2rem; color: #1a2e44; font-weight: 700; margin-bottom: 12px;">סה"כ סגורים</div>
+            <div style="display: flex; align-items: flex-start; justify-content: center; gap: 32px;">
+                <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
+                    <span style="font-size: 1.3rem; color: #888; font-weight: 600;">{{ total_closed_prev }}</span>
+                    <span style="font-size: 1rem; color: #bbb;">{{ prev_month_name }}</span>
+                </div>
+                <div style="font-size: 3.2rem; font-weight: bold; color: #1976d2; min-width: 60px; text-align: center;">{{ total_closed_current }}</div>
+            </div>
+            <div class="percent-diff" id="closed-diff" style="display:none; margin-top: 10px;"></div>
+        </div>
+        <div class="summary-item clickable-summary" id="avg-summary">
+            <div class="label" style="font-size: 1.2rem; color: #1a2e44; font-weight: 700; margin-bottom: 12px;">ממוצע זמן טיפול (ימים)</div>
+            <div style="display: flex; align-items: flex-start; justify-content: center; gap: 32px;">
+                <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
+                    <span style="font-size: 1.3rem; color: #888; font-weight: 600;">{{ avg_proc_time_prev }}</span>
+                    <span style="font-size: 1rem; color: #bbb;">{{ prev_month_name }}</span>
+                </div>
+                <div style="font-size: 3.2rem; font-weight: bold; color: #1976d2; min-width: 60px; text-align: center;">{{ avg_proc_time_current }}</div>
+            </div>
+            <div class="percent-diff" id="avg-diff" style="display:none; margin-top: 10px;"></div>
+        </div>
+    </div>
+    <script>
+    function percentDiff(current, prev, is_time) {
+        if (prev == 0) return '';
+        let diff = ((current - prev) / Math.abs(prev)) * 100;
+        let sign = diff > 0 ? '+' : '';
+        let arrow = '';
+        let color = '';
+        if (is_time) {
+            color = diff < 0 ? '#388e3c' : '#c62828';
+            arrow = diff < 0 ? '↓' : '↑';
+        } else {
+            color = diff > 0 ? '#388e3c' : '#c62828';
+            arrow = diff > 0 ? '↑' : '↓';
+        }
+        return `<span style="color:${color}; font-weight:600; font-size:1.1rem;">${arrow} ${sign}${Math.abs(diff).toFixed(1)}%</span>`;
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('open-summary').onclick = function() {
+            let el = document.getElementById('open-diff');
+            if (el.style.display === 'none') {
+                el.innerHTML = percentDiff({{ total_open_current }}, {{ total_open_prev }}, false);
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        };
+        document.getElementById('closed-summary').onclick = function() {
+            let el = document.getElementById('closed-diff');
+            if (el.style.display === 'none') {
+                el.innerHTML = percentDiff({{ total_closed_current }}, {{ total_closed_prev }}, false);
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        };
+        document.getElementById('avg-summary').onclick = function() {
+            let el = document.getElementById('avg-diff');
+            if (el.style.display === 'none') {
+                el.innerHTML = percentDiff({{ avg_proc_time_current }}, {{ avg_proc_time_prev }}, true);
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        };
+    });
+    </script>
+    <!-- תובנות AI  -->
+    <div class="card border-info mb-4">
+        <div class="card-header bg-info text-white" style="font-size: 1.2rem; font-weight: bold;">
+            <i class="fas fa-lightbulb mr-2"></i> תובנות AI 
+        </div>
+        <div class="card-body" style="background: #f8fcff;">
+            {% if ai_insights and ai_insights|length > 0 %}
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                {% for insight in ai_insights %}
+                <li style="margin-bottom: 12px; font-size: 1.08rem;">
+                    <i class="fas fa-arrow-circle-right text-info ml-2"></i> {{ insight }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="text-center text-muted" style="font-size: 1.08rem;">לא נמצאו שינויים משמעותיים החודש.</div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- גרף קו של תגים שנפתחו לפי חודשים -->
+    <div class="card mb-4">
+        <div class="card-header">תגים שנפתחו לפי חודשים</div>
+        <div class="card-body">
+            <div class="chart-container">
+                {% if time_data|length > 0 and (time_data|select('!=', None)|list)|length > 0 %}
+                <canvas id="monthlyOpenTagsChart" height="350"></canvas>
+                {% else %}
+                <div class="text-center text-muted" style="font-size: 1.1rem;">אין נתונים להצגה בגרף זה.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="{{ url_for('more_report') }}" class="btn btn-primary btn-lg">מעבר לנתונים נוספים</a>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/chart.umd.min.js"></script>
+<script src="/static/datatables.min.js"></script>
+<script>
+window.reportData = {
+    statusCounts: {{ status_counts | tojson | safe }},
+    statusPercentages: {{ status_percentages | tojson | safe }},
+    skuSummaryKeys: {{ sku_summary_keys | tojson | safe }},
+    openedCounts: {{ opened_counts | tojson | safe }},
+    closedCounts: {{ closed_counts | tojson | safe }},
+    timeLabels: {{ time_labels | map('replace', '2025-', '') | list | tojson | safe }},
+    timeData: {{ time_data | tojson | safe }}
+};
+</script>
+<script src="/static/js/report.js"></script>
+{% endblock %}

@@ -1,0 +1,15 @@
+.test-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+.all-ok-btn {
+    margin-top: 10px;
+}
+.form-group input[list] {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    width: 204%;
+}

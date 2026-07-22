@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <a href="{{ url_for('main_index') }}" class="btn btn-secondary mb-3">חזור לעמוד הראשי</a>
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1>רשימת מק"טים מאושרים</h1>
+    </div>
+    
+
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="error-alert">
+        {{ error }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="סגור"><span aria-hidden="true">&times;</span></button>
+    </div>
+    {% endif %}
+
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>הוסף מק"ט חדש</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="form-inline">
+                <div class="form-group mb-2 mr-2">
+                    <input type="text" name="sku_code" id="sku_code" class="form-control" placeholder="מספר מקט" required>
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <input type="text" name="description" id="description" class="form-control" placeholder="תיאור (אופציונלי)">
+                </div>
+                <button type="submit" name="add_sku" class="btn btn-primary mb-2">הוסף</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>כל המק"טים המאושרים</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>קוד מק"ט</th>
+                        <th>תיאור</th>
+                        <th>דף בדיקות סופיות</th>
+                        <th>מחיקה</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sku in skus %}
+                    <tr>
+                        <td>{{ sku[1] }}</td>
+                        <td>{{ sku[2] if sku[2] else '-' }}</td>
+                        <td style="min-width:180px; vertical-align:middle;">
+                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:120px;">
+                                {% if sku[3] %}
+                                    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                                        {% set file_str = sku[3]|string|lower %}
+                                        {% if sku[3] and file_str[-4:] == '.pdf' %}
+                                            <a href="/static/final_checks/{{ sku[3] }}" target="_blank" class="btn btn-outline-primary btn-sm mb-1" title="הצג PDF"><i class="fas fa-file-pdf fa-lg"></i></a>
+                                        {% else %}
+                                            <a href="/static/final_checks/{{ sku[3] }}" target="_blank" title="הצג תמונה">
+                                                <img src="/static/final_checks/{{ sku[3] }}" alt="דף בדיקות" style="max-width:70px; max-height:70px; border-radius:10px; border:1.5px solid #818cf8; box-shadow:0 2px 8px #818cf822; margin-bottom:2px;">
+                                            </a>
+                                        {% endif %}
+                                        <div style="display:flex; flex-direction:row; gap:8px; margin-top:2px;">
+                                            <form method="post" enctype="multipart/form-data" style="display:inline-block;">
+                                                <input type="hidden" name="sku_id" value="{{ sku[0] }}">
+                                                <label style="margin-bottom:0; cursor:pointer;">
+                                                    <input type="file" name="final_check_image" accept="image/*,.pdf" style="display:none;" onchange="this.form.submit()">
+                                                    <span class="btn btn-light btn-sm rounded-circle" title="החלף קובץ"><i class="fas fa-pen"></i></span>
+                                                </label>
+                                                <button type="submit" name="upload_final_check" style="display:none;"></button>
+                                            </form>
+                                            <form method="post" style="display:inline-block;">
+                                                <input type="hidden" name="sku_id" value="{{ sku[0] }}">
+                                                <button type="submit" name="delete_final_check" class="btn btn-light btn-sm rounded-circle" title="מחק קובץ" style="color:#d7263d;"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <form method="post" enctype="multipart/form-data" style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                                        <input type="hidden" name="sku_id" value="{{ sku[0] }}">
+                                        <label style="cursor:pointer;">
+                                            <span class="btn btn-light btn-lg rounded-circle" style="width:54px; height:54px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px #818cf822;">
+                                                <i class="fas fa-cloud-upload-alt fa-lg" style="color:#6366f1;"></i>
+                                            </span>
+                                            <input type="file" name="final_check_image" accept="image/*,.pdf" style="display:none;" onchange="this.form.submit()">
+                                        </label>
+                                        <button type="submit" name="upload_final_check" style="display:none;"></button>
+                                        <span style="font-size:0.95em; color:#6366f1;">העלה קובץ</span>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <button type="button" name="delete_sku" class="btn btn-danger btn-sm delete-btn" data-sku-id="{{ sku[0] }}">מחק</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/approved_skus.js"></script>
+{% if message %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    showSuccessAlert({{ message|tojson }});
+});
+</script>
+{% endif %}
+{% endblock %} 

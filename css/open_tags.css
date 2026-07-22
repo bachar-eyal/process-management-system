@@ -1,0 +1,43 @@
+.no-wrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+.actions-cell {
+    vertical-align: top;
+    padding: 8px;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    margin: 2px;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #007bff;
+    color: white !important;
+    border: 1px solid #007bff;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #0056b3;
+    color: white !important;
+    border: 1px solid #0056b3;
+}
+/* יישור תוכן הטבלה לימין */
+#tagsTable th, #tagsTable td {
+    text-align: right !important;
+    padding-right: 12px;
+    padding-left: 8px;
+}
+/* שיפור עיצוב הכפתורים בתא הפעולות */
+.actions-cell .btn {
+    margin-left: 5px;
+}
+/* יישור טקסט המידע של DataTables */
+.dataTables_info {
+    text-align: right !important;
+}
+/* מרכוז כפתורי הפגינציה */
+.dataTables_wrapper .dataTables_paginate {
+    text-align: center !important;
+}

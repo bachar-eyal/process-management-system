@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/datatables.min.css">
+<link rel="stylesheet" href="/static/css/report.css">
+<link rel="stylesheet" href="/static/fontawesome.min.css">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <a href="{{ url_for('main_index') }}" class="btn btn-secondary mb-3">חזור לעמוד הראשי</a>
+    <div style="text-align: center;">
+        <h1 class="mt-4" style="color: #1a2e44; font-weight: 700; text-transform: uppercase;">דוח ניהולי - תגי תהליך</h1>
+    </div>
+    <br>
+    <br>
+    <div class="row mb-4 justify-content-center" style="gap: 18px;">
+      <div class="col-md-3 col-12">
+          <div class="card text-center" style="background: linear-gradient(90deg, #e3f0ff 0%, #f9fbfd 100%); border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+          <div class="card-body">
+              <div style="font-size: 2.2rem; font-weight: bold; color: #1976d2;"><i class="fas fa-folder-open" style="margin-left: 8px;"></i>{{ total_opened }}</div>
+            <div style="font-size: 1.1rem; color: #1a2e44; margin-top: 6px;">כמות פריטים נפתחו</div>
+        </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-12">
+        <div class="card text-center" style="background: linear-gradient(90deg, #fffbe3 0%, #f9fbfd 100%); border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+            <div class="card-body">
+                <div style="font-size: 2.2rem; font-weight: bold; color: #ffc107;"><i class="fas fa-tasks" style="margin-left: 8px;"></i>{{ total_in_progress }}</div>
+                <div style="font-size: 1.1rem; color: #1a2e44; margin-top: 6px;">כמות פריטים בביצוע</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-12">
+        <div class="card text-center" style="background: linear-gradient(90deg, #e3ffe3 0%, #f9fbfd 100%); border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+            <div class="card-body">
+                <div style="font-size: 2.2rem; font-weight: bold; color: #28a745;"><i class="fas fa-check-circle" style="margin-left: 8px;"></i>{{ total_closed }}</div>
+          <div style="font-size: 1.1rem; color: #1a2e44; margin-top: 6px;">כמות פריטים נסגרו</div>
+      </div>
+      </div>
+    </div>
+
+    </div>
+    <br>
+    <!-- סינון מתקדם -->
+    <form method="POST" action="{{ url_for('more_report') }}" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label>מתאריך:</label>
+                <input type="date" class="form-control" name="start_date" value="{{ start_date }}">
+            </div>
+            <div class="col-md-4">
+                <label>עד תאריך:</label>
+                <input type="date" class="form-control" name="end_date" value="{{ end_date }}">
+            </div>
+            <div class="col-md-4">
+                <label>מק"ט מסוים:</label>
+                <input type="text" class="form-control" name="sku" value="{{ sku }}">
+            </div>
+        </div>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">הצג דוח</button>
+            <button type="button" class="btn btn-secondary" onclick="this.form.querySelector('input[name=start_date]').value=''; this.form.querySelector('input[name=end_date]').value=''; this.form.querySelector('input[name=sku]').value=''; this.form.submit();">איפוס</button>
+        </div>
+    </form>
+    <br>
+
+
+    <!-- התפלגות סטטוסים (תגים סגורים) -->
+    <div class="card mb-4">
+        <div class="card-header">התפלגות סטטוסים (תגים סגורים)</div>
+        <div class="card-body">
+            {% if status_counts and status_counts|length > 0 and total_closed > 0 %}
+            <div class="status-distribution">
+                {% for status, count in status_counts.items()|sort %}
+                {% set percentage = status_percentages.get(status, 0)|round(2) %}
+                <div class="mb-3">
+                    <label style="font-weight: 500; color: #1a2e44;">{{ status if status else 'ללא סטטוס' }}: {{ count }} ({{ percentage }}%)</label>
+                    <div class="progress">
+                        <div class="progress-bar {% if status == 'שמיש' %}bg-success{% elif status == 'תקול' %}bg-danger{% else %}bg-warning{% endif %}"
+                            role="progressbar"
+                            style="width: {{ percentage }}%;"
+                            aria-valuenow="{{ percentage }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100">
+                            {{ percentage }}%
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">אין סטטוסים להצגה או תגים סגורים.</p>
+            {% endif %}
+            <div class="chart-container">
+                <canvas id="statusBarChart" height="350"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- גרף תגים שנפתחו ונסגרו לפי מק"ט -->
+    <div class="card mb-4">
+        <div class="card-header">תגים שנפתחו ונסגרו לפי מק"ט בתקופה</div>
+        <div class="card-body">
+            <div class="chart-container">
+                <canvas id="openCloseTagsBySKUChart" height="350"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- סקירה לפי מק"ט -->
+    <div class="card mb-4">
+        <div class="card-header">סטטיסטיקות לפי מק"ט</div>
+        <div class="card-body">
+            <div class="row">
+                {% for sku, data in sku_summary.items() %}
+                <div class="col-md-4">
+                    <div class="card card-summary mb-3">
+                        <div class="card-header">{{ sku }}</div>
+                        <div class="card-body">
+                            <p>סה"כ: {{ data.total }}</p>
+                            <p>פתוחים: {{ data.open }}</p>
+                            <p>סגורים: {{ data.closed }}</p>
+                            {% if data.open_tags %}
+                            <button class="btn btn-sm btn-link toggle-open-tags" data-sku="{{ sku }}">▼</button>
+                            <div class="open-tags-list" id="open-tags-{{ sku }}" style="display: none;">
+                                <ul class="list-group list-group-flush">
+                                    {% for serial, days in data.open_tags.items() %}
+                                    <li class="list-group-item" style="background-color: #fff; border: none;">תג {{ serial }}: פתוח {{ days }} ימים</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- טבלת תגים -->
+    <div class="card mb-4">
+        <div class="card-header">רשימת תגים</div>
+        <div class="card-body">
+            <table id="tagsTable" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>מס"ד</th>
+                        <th>מספר סידורי</th>
+                        <th>מק"ט</th>
+                        <th>תיאור תקלה</th>
+                        <th>סטטוס</th>
+                        <th>תאריך פתיחה</th>
+                        <th>תאריך עדכון אחרון</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tag in tags %}
+                    <tr>
+                        <td>{{ tag[0] }}</td>
+                        <td>{{ tag[1] }}</td>
+                        <td>{{ tag[7] if tag[7] else '' }}</td>
+                        <td>
+                            {% if tag[2] %}
+                                {% set fault_parts = tag[2].split('\n') %}
+                                {% if fault_parts|length > 1 %}
+                                    <strong>{{ fault_parts[0] }}</strong><br>
+                                    {% for part in fault_parts[1:] if part|trim %}
+                                        {{ part|trim }}<br>
+                                    {% endfor %}
+                                {% else %}
+                                    {{ tag[2] }}
+                                {% endif %}
+                            {% else %}
+                                ללא תיאור
+                            {% endif %}
+                        </td>
+                        <td>{{ 'סגור' if tag[5] else 'פתוח' }}</td>
+                        <td>{{ tag[6] if tag[6] else '' }}</td>
+                        <td>{{ tag[4] if tag[4] else '' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/chart.umd.min.js"></script>
+<script src="/static/datatables.min.js"></script>
+<script>
+    // הגדרת נתונים דינמיים כמשתנים גלובליים
+    window.reportData = {
+        statusCounts: {{ status_counts | tojson | safe }},
+        statusPercentages: {{ status_percentages | tojson | safe }},
+        skuSummaryKeys: {{ sku_summary_keys | tojson | safe }},
+        openedCounts: {{ opened_counts | tojson | safe }},
+        closedCounts: {{ closed_counts | tojson | safe }},
+        timeLabels: {{ time_labels | map('replace', '2025-', '') | list | tojson | safe }},
+        timeData: {{ time_data | tojson | safe }}
+    };
+</script>
+<script src="/static/js/report.js"></script>
+{% endblock %} 

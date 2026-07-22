@@ -1,0 +1,650 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/product.css">
+<style>
+.solution-content {
+    font-size: 16px;
+    line-height: 1.6;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    border-left: 4px solid #17a2b8;
+    margin: 10px 0;
+}
+
+.solution-content p {
+    margin-bottom: 15px;
+}
+
+.solution-content ul, .solution-content ol {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.solution-content li {
+    margin-bottom: 8px;
+}
+
+.solution-content strong {
+    color: #495057;
+    font-weight: 600;
+}
+
+.solution-content .text-muted {
+    color: #6c757d !important;
+    font-style: italic;
+}
+
+.solution-content .text-danger {
+    color: #dc3545 !important;
+    font-weight: 500;
+}
+
+.modal-header .fas {
+    font-size: 18px;
+}
+
+.solution-found {
+    animation: fadeIn 0.5s ease-in;
+}
+
+.solution-not-found, .solution-error {
+    animation: fadeIn 0.5s ease-in;
+}
+
+.solution-text {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom animated alert */
+.animated-alert {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    min-width: 400px;
+    max-width: 700px;
+    width: 60vw;
+    z-index: 2000;
+    background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    color: #155724;
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-align: center;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 18px 32px 18px 32px;
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.4s;
+}
+.animated-alert.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+.icon-btn {
+    border: none;
+    background-color: #f8f9fa; 
+    color: #000000;           
+    border-radius: 50%;       
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+    }
+.icon-btn:hover {
+    background-color: #e2e6ea; 
+    color: #000000;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<script>
+window.successMessage = {{ success_message|tojson|safe }};
+
+// הצג הודעת הצלחה מהשרת אם קיימת
+if (window.successMessage) {
+    document.addEventListener('DOMContentLoaded', function() {
+        showAlert(window.successMessage, 'success');
+    });
+}
+</script>
+
+<!-- אלמנט להודעות הצלחה -->
+<div id="success-alert" class="alert" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px; text-align: center;"></div>
+
+<div class="container">
+    <a href="{{ url_for('open_tags') }}" class="btn btn-secondary mb-3">חזור לתגים פתוחים</a>
+    <div style="text-align: center;">
+        <h1>פרטי מוצר: {{ product[0] }}</h1>
+    </div>
+    <br>
+    <div class="card mb-3">
+        <div class="card-body">
+            <p>
+                <strong>מק"ט:</strong> 
+                {{ product[1] if product[1] else 'לא זמין' }}
+                {% if open_tag %}
+                <button type="button" class="btn btn-xs btn-outline-primary ml-1" onclick="console.log('Edit button clicked'); openSkuChangeModal();">
+                    <i class="fas fa-edit"></i>
+                </button>
+                {% endif %}
+            </p>
+            {% if open_tag %}
+                <p><strong>תאריך הוספה:</strong> {{ product[2][:10] if product[2] else '' }}</p>
+            {% else %}
+                <p><strong>תאריך סגירה:</strong> {{ tags[0][5][:10] if tags and tags[0][5] else '' }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <h2>תגי תהליך</h2>
+    {% if tags %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>פעולות</th>
+                <th>מזהה תג</th>
+                <th>תיאור תקלה</th>
+                <th>פעולות שבוצעו</th>
+                <th>סטטוס</th>
+                <th>תאריך</th>
+                <th>מצב</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tag in tags %}
+            <tr>
+                <td>
+                    {% if final_check_snapshot_index is not none and tag|length > final_check_snapshot_index %}
+                    {% set final_check_snapshot = tag[final_check_snapshot_index] %}
+                    {% else %}
+                    {% set final_check_snapshot = None %}
+                    {% endif %}
+                    {% if tag[6] == 0 %}
+                    <a href="{{ url_for('edit_tag', tag_id=tag[0]) }}" class="btn btn-sm btn-warning">ערוך</a>
+                    {% set tag_sku = tag[sku_column_index] if sku_column_index is defined and sku_column_index is not none and tag|length > sku_column_index and tag[sku_column_index] else sku %}
+                    <a href="{{ url_for('close_tag', serial_number=tag[1], sku=tag_sku) }}" class="btn btn-sm btn-danger">סגור</a>
+                    {% else %}
+                    סגור
+                    {% endif %}
+                    {% if tag[2] and tag[6] == 0 %}
+                    <button type="button" class="btn btn-sm btn-info view-solution-btn" data-fault-description="{{ tag[2] }}">הצג פתרון</button>
+                    {% endif %}
+                    <a href="{{ url_for('print_signature_on_image_route', tag_id=tag[0]) }}" class="btn btn-light" title="הדפס תג">
+                        <i class="fas fa-print"></i>
+                    </a>
+                    {% if tag[6] != 0 and final_check_snapshot %}
+                    <a href="{{ url_for('final_check_print_view', tag_id=tag[0]) }}" class="btn btn-light" title="הדפס בדיקות סופיות" target="_blank">
+                        <i class="fas fa-file-export"></i>
+                    </a>
+                    {% endif %}
+                </td>
+                <td>{{ tag[0] }}</td>
+                <td>
+                    {% if tag[2] %}
+                        {% set fault_parts = tag[2].split('\n') %}
+                        {% if fault_parts|length > 1 %}
+                            <strong>{{ fault_parts[0] }}</strong><br>
+                            {% for part in fault_parts[1:] if part|trim %}
+                                {{ part|trim }}<br>
+                            {% endfor %}
+                        {% else %}
+                            {{ tag[2] }}
+                        {% endif %}
+                    {% else %}
+                        ללא תיאור
+                    {% endif %}
+                </td>
+                <td class="actions-cell">
+                    {% if tag[3] %}
+                        {% set actions = tag[3].split('\n') %}
+                        {% for action in actions if action|trim %}
+                            {{ action|trim }}<br>
+                        {% endfor %}
+                    {% else %}
+                        ללא פעולות
+                    {% endif %}
+                </td>
+                <td>{{ tag[4] if tag[4] else 'ללא סטטוס' }}</td>
+                <td>{{ tag[5] }}</td>
+                <td>{{ 'פתוח' if tag[6] == 0 else 'סגור' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">אין תגי תהליך עבור מוצר זה.</p>
+    {% endif %}
+    {% if not open_tag %}
+    <a href="{{ url_for('new_tag', serial_number=serial_number, sku=sku) }}" class="btn btn-primary mt-3">צור תג תהליך חדש</a>
+    {% endif %}
+    <a href="{{ url_for('main_index') }}" class="btn btn-secondary mt-3">חזור לעמוד הראשי</a>
+</div>
+
+<!-- Modal for viewing solution -->
+<div class="modal fade" id="solutionModal" tabindex="-1" role="dialog" aria-labelledby="solutionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="solutionModalLabel">
+                    <i class="fas fa-lightbulb mr-2"></i>
+                    המלצה לפתרון תקלה
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div id="solutionContent" class="solution-content"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">סגור</button>
+            </div>
+            <!-- <button class="btn btn-secondary" onclick="signature_on_image({serial_number, sku})">חתימה</button> -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal for changing SKU -->
+<div class="modal fade" id="skuChangeModal" tabindex="-1" role="dialog" aria-labelledby="skuChangeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="skuChangeModalLabel">
+                    <i class="fas fa-edit mr-2"></i>
+                    שינוי זהות מק"ט
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label><strong>מק"ט נוכחי:</strong></label>
+                    <p class="form-control-static" id="currentSku">{{ product[1] if product[1] else 'לא זמין' }}</p>
+                </div>
+                <div class="form-group">
+                    <label for="newSku"><strong>בחר מק"ט חדש:</strong></label>
+                    <input type="text" class="form-control" id="newSku" list="sku-options" placeholder="הזן מקט או תיאור">
+                    <datalist id="sku-options">
+                        {% for sku_code, description in approved_skus %}
+                        <option value="{{ sku_code }}">{{ description if description else 'ללא תיאור' }}</option>
+                        {% endfor %}
+                    </datalist>
+                    <div class="error-message" id="sku-error" style="display: none; color: red; margin-top: 5px;">המק"ט לא קיים במערכת</div>
+                </div>
+                <div id="skuChangeMessage" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">ביטול</button>
+                <button type="button" class="btn btn-primary" id="changeSkuBtn">
+                    <span id="changeSkuText">שנה מק"ט</span>
+                    <span id="changeSkuLoading" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i> משנה...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+// פונקציה לשינוי SKU
+function changeSku() {
+    console.log('changeSku function called');
+    
+    const currentSku = document.getElementById('currentSku').textContent;
+    const newSku = document.getElementById('newSku').value.trim();
+    const errorMessage = document.getElementById('sku-error');
+    const changeMessage = document.getElementById('skuChangeMessage');
+    const changeBtn = document.getElementById('changeSkuBtn');
+    const changeText = document.getElementById('changeSkuText');
+    const changeLoading = document.getElementById('changeSkuLoading');
+    
+    console.log('Current SKU:', currentSku);
+    console.log('New SKU:', newSku);
+    
+    // בדוק שהקלט לא ריק
+    if (!newSku) {
+        console.log('No SKU selected');
+        showModalMessage('אנא בחר מק"ט חדש', 'warning');
+        showAlert('אנא בחר מק"ט חדש', 'warning');
+        return;
+    }
+    
+    // בדוק אם זה אותו SKU
+    if (newSku === currentSku) {
+        console.log('Same SKU selected');
+        showModalMessage('המק"ט שנבחר זהה למק"ט הנוכחי', 'info');
+        showAlert('המק"ט שנבחר זהה למק"ט הנוכחי', 'info');
+        return;
+    }
+    
+    // בדוק שה-SKU תקין
+    if (errorMessage.style.display === 'block') {
+        console.log('Invalid SKU selected');
+        showModalMessage('לא ניתן להמיר את הפריט הנוכחי לתג לא מאופשר במערכת', 'error');
+        showAlert('לא ניתן להמיר את הפריט הנוכחי לתג לא מאופשר במערכת', 'error');
+        return;
+    }
+    
+    // הצג loading
+    changeBtn.disabled = true;
+    changeText.style.display = 'none';
+    changeLoading.style.display = 'inline';
+    showModalMessage('<i class="fas fa-spinner fa-spin"></i> משנה מק"ט...', 'info');
+    
+    // שלח בקשה לשרת
+    fetch('/change_product_sku', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            serial_number: '{{ serial_number }}',
+            current_sku: currentSku,
+            new_sku: newSku
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // החזר את הכפתור למצב רגיל
+        changeBtn.disabled = false;
+        changeText.style.display = 'inline';
+        changeLoading.style.display = 'none';
+        
+        if (data.success) {
+            showModalMessage('<i class="fas fa-check-circle"></i> ' + data.message, 'success');
+            
+            // סגור את המודל אחרי הצלחה
+            setTimeout(() => {
+                $('#skuChangeModal').modal('hide');
+            }, 1000);
+            
+            // עבור לדף המוצר עם ה-SKU החדש
+            setTimeout(() => {
+                const serialNumber = '{{ serial_number }}';
+                window.location.href = `/product/${serialNumber}/${newSku}`;
+            }, 2000);
+        } else {
+            showModalMessage('<i class="fas fa-exclamation-triangle"></i> ' + data.error, 'error');
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        // החזר את הכפתור למצב רגיל
+        changeBtn.disabled = false;
+        changeText.style.display = 'inline';
+        changeLoading.style.display = 'none';
+        showModalMessage('<i class="fas fa-times-circle"></i> אירעה שגיאה בשינוי המק"ט', 'error');
+        showAlert('אירעה שגיאה בשינוי המק"ט', 'error');
+    });
+}
+
+// פונקציה להצגת alert הצלחה
+function showSuccessAlert(message) {
+    const alertDiv = document.getElementById('success-alert');
+    if (alertDiv) {
+        alertDiv.style.display = 'block';
+        setTimeout(() => {
+            alertDiv.style.top = '20px';
+        }, 10);
+        setTimeout(() => {
+            alertDiv.style.top = '-100px';
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 300);
+        }, 2000);
+    }
+}
+
+// הצג הודעת הצלחה כשהדף נטען
+document.addEventListener('DOMContentLoaded', function() {
+    var successAlert = document.getElementById('success-alert');
+    if (successAlert && successAlert.textContent.trim() !== '') {
+        successAlert.style.display = 'block';
+        setTimeout(function() {
+            successAlert.style.display = 'none';
+        }, 4000);
+    }
+    
+    // הוסף event listeners לכפתורי הצפייה בפתרון
+    const viewSolutionButtons = document.querySelectorAll('.view-solution-btn');
+    viewSolutionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const faultDescription = this.getAttribute('data-fault-description');
+            fetchSolution(faultDescription);
+        });
+    });
+    
+    // הוסף validation לקלט המק"ט החדש
+    const newSkuInput = document.getElementById('newSku');
+    if (newSkuInput) {
+        newSkuInput.addEventListener('input', function() {
+            validateSkuInput(this.value);
+        });
+    }
+    
+    // הוסף event listener לכפתור שינוי SKU
+    const changeSkuBtn = document.getElementById('changeSkuBtn');
+    if (changeSkuBtn) {
+        console.log('Adding event listener to changeSkuBtn');
+        changeSkuBtn.addEventListener('click', function() {
+            console.log('Change SKU button clicked');
+            changeSku();
+        });
+    } else {
+        console.error('changeSkuBtn not found');
+    }
+
+    var alertBox = document.getElementById('animated-success-alert');
+    if (alertBox) {
+        setTimeout(function() {
+            alertBox.classList.add('show');
+        }, 100); // slight delay for animation
+        setTimeout(function() {
+            alertBox.classList.remove('show');
+        }, 4100); // show for 4s, then hide
+    }
+});
+
+// פונקציה לקבלת פתרון מהשרת
+function fetchSolution(faultDescription) {
+    // הצג loading
+    document.getElementById('solutionContent').innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin fa-2x text-info"></i>
+            <p class="mt-2">טוען פתרון...</p>
+        </div>
+    `;
+    $('#solutionModal').modal('show');
+    
+    fetch('/get_solution', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            fault_description: faultDescription
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.solution) {
+            document.getElementById('solutionContent').innerHTML = `
+                <div class="solution-found">
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle text-success mr-2"></i>
+                        <strong>נמצא פתרון מומלץ:</strong>
+                    </div>
+                    <div class="solution-text">
+                        ${data.solution.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+        } else {
+            document.getElementById('solutionContent').innerHTML = `
+                <div class="solution-not-found">
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-triangle text-warning fa-2x mb-3"></i>
+                        <h5 class="text-muted">לא נמצא פתרון מוגדר</h5>
+                        <p class="text-muted">
+                            לתקלה זו לא הוגדר פתרון במערכת.<br>
+                            אנא פנה למנהל המערכת להגדרת פתרון מתאים.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('solutionContent').innerHTML = `
+            <div class="solution-error">
+                <div class="text-center">
+                    <i class="fas fa-times-circle text-danger fa-2x mb-3"></i>
+                    <h5 class="text-danger">שגיאה בטעינת הפתרון</h5>
+                    <p class="text-muted">
+                        אירעה שגיאה בעת טעינת הפתרון.<br>
+                        אנא נסה שוב או פנה לתמיכה טכנית.
+                    </p>
+                </div>
+            </div>
+        `;
+    });
+}
+
+// פונקציה לפתיחת מודל שינוי SKU
+function openSkuChangeModal() {
+    $('#skuChangeModal').modal('show');
+    document.getElementById('newSku').value = '';
+    document.getElementById('sku-error').style.display = 'none';
+    document.getElementById('skuChangeMessage').style.display = 'none';
+}
+
+// פונקציה לוולידציה של קלט SKU
+function validateSkuInput(value) {
+    const skuOptions = document.querySelectorAll('#sku-options option');
+    const validSkus = new Set();
+    skuOptions.forEach(option => {
+        validSkus.add(option.value);
+    });
+    
+    const errorMessage = document.getElementById('sku-error');
+    if (value && !validSkus.has(value)) {
+        errorMessage.style.display = 'block';
+    } else {
+        errorMessage.style.display = 'none';
+    }
+}
+
+// פונקציה להצגת הודעה במודל
+function showModalMessage(message, type) {
+    const changeMessage = document.getElementById('skuChangeMessage');
+    if (!changeMessage) {
+        return;
+    }
+    
+    let className = 'alert ';
+    
+    switch(type) {
+        case 'success':
+            className += 'alert-success';
+            break;
+        case 'error':
+            className += 'alert-danger';
+            break;
+        case 'warning':
+            className += 'alert-warning';
+            break;
+        case 'info':
+            className += 'alert-info';
+            break;
+    }
+    
+    changeMessage.className = className;
+    changeMessage.innerHTML = message;
+    changeMessage.style.display = 'block';
+    
+    // גלול למודל כדי שההודעה תהיה נראית
+    const modalBody = document.querySelector('#skuChangeModal .modal-body');
+    if (modalBody) {
+        modalBody.scrollTop = modalBody.scrollHeight;
+    }
+    
+    // הסתר הודעת הצלחה אחרי 5 שניות
+    if (type === 'success') {
+        setTimeout(() => {
+            changeMessage.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// פונקציה להצגת alert
+function showAlert(message, type) {
+    console.log('showAlert called with:', message, type);
+    
+    const alertDiv = document.getElementById('success-alert');
+    if (!alertDiv) {
+        console.error('success-alert element not found');
+        return;
+    }
+    
+    let className = 'alert ';
+    
+    switch(type) {
+        case 'success':
+            className += 'alert-success';
+            break;
+        case 'error':
+            className += 'alert-danger';
+            break;
+        case 'warning':
+            className += 'alert-warning';
+            break;
+        case 'info':
+            className += 'alert-info';
+            break;
+    }
+    
+    alertDiv.className = className;
+    alertDiv.innerHTML = message;
+    alertDiv.style.display = 'block';
+    alertDiv.style.top = '20px';
+    alertDiv.style.opacity = '1';
+    
+    console.log('Alert displayed:', alertDiv.outerHTML);
+    console.log('Alert position:', alertDiv.style.top);
+    console.log('Alert display:', alertDiv.style.display);
+    console.log('Alert computed style:', window.getComputedStyle(alertDiv).top);
+    console.log('Alert in DOM:', document.body.contains(alertDiv));
+    console.log('Alert parent:', alertDiv.parentNode);
+    console.log('Alert visible:', alertDiv.offsetHeight > 0);
+    console.log('Alert dimensions:', alertDiv.offsetWidth, 'x', alertDiv.offsetHeight);
+    console.log('Alert z-index:', window.getComputedStyle(alertDiv).zIndex);
+    console.log('Alert visibility:', window.getComputedStyle(alertDiv).visibility);
+    console.log('Alert opacity:', window.getComputedStyle(alertDiv).opacity);
+    console.log('Alert overflow:', window.getComputedStyle(alertDiv).overflow);
+    console.log('Alert background:', window.getComputedStyle(alertDiv).backgroundColor);
+    console.log('Alert color:', window.getComputedStyle(alertDiv).color);
+    
+    // הסתר את ה-alert אחרי 3 שניות
+    setTimeout(() => {
+        alertDiv.style.top = '-100px';
+        alertDiv.style.opacity = '0';
+        setTimeout(() => {
+            alertDiv.style.display = 'none';
+        }, 300);
+    }, 3000);
+}
+</script>
+<script src="/static/js/product.js"></script>
+{% endblock %}

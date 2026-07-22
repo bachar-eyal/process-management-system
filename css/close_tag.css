@@ -1,0 +1,188 @@
+.container {
+    display: block;
+}
+.card {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    margin-bottom: 20px;
+}
+.card-body {
+    display: flex;
+    width: 100%;
+}
+.left-panel {
+    width: 65%;
+    padding: 20px;
+}
+.right-panel {
+    width: 30%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    text-align: right;
+}
+.right-panel img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.confirmation-button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: linear-gradient(45deg, #28a745, #34ce57, #28a745);
+    background-size: 200% 200%;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: gradientMove 5s ease infinite;
+}
+.confirmation-button:hover {
+    background: linear-gradient(45deg, #218838, #28a745, #218838);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.form-group button[type="submit"] {
+    margin-top: 20px;
+}
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* עיצוב המודאל המותאם */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: white;
+  margin: 15% auto;
+  padding: 20px;
+  border-radius: 10px;
+  width: 320px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  font-family: 'Arial', sans-serif;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+}
+
+/* עיצוב מודל ציור */
+#drawing-modal .modal-content {
+  width: auto;
+  min-width: 600px;
+  max-width: 97%;
+  max-height: 97vh;
+  margin: 1.5% auto;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawing-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.drawing-header h3 {
+  margin-bottom: 8px;
+}
+
+.drawing-subtitle {
+  color: #4b5563;
+  margin: 0;
+}
+
+.drawing-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.zoom-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoom-btn {
+  border: 1px solid #cbd5e1;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: #1e293b;
+}
+
+.zoom-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+}
+
+.zoom-level {
+  font-weight: 600;
+  color: #1f2937;
+  min-width: 60px;
+  text-align: center;
+}
+
+.zoom-warning {
+  color: #b45309;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drawing-canvas-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: auto;
+  border: 2px solid #6366f1;
+  border-radius: 12px;
+  padding: 12px;
+  background: #eef2ff;
+  max-height: 80vh;
+}
+
+.drawing-canvas {
+  background: white;
+  touch-action: none;
+  cursor: crosshair;
+  display: block;
+}
+
+.drawing-actions {
+  text-align: center;
+  margin-top: 15px;
+}
+
+#drawing-warning {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

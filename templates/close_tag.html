@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/close_tag.css">
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px;">
+    <div style="text-align: center; margin-bottom: 24px;">
+        <h1>סגירת תג תהליך עבור {{ serial_number }}</h1>
+    </div>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% else %}
+        <div class="card mb-3">
+            <div class="card-body d-flex flex-row" style="gap: 32px;">
+                <div class="left-panel flex-fill" style="min-width: 0;">
+                    <p><strong>תג תהליך:</strong> {{ tag[0] }}</p>
+                    <p><strong>תיאור תקלה:</strong>
+                        {% if tag[2] %}
+                            {% set fault_parts = tag[2].split('\n') %}
+                            {% if fault_parts|length > 1 %}
+                                <strong>{{ fault_parts[0] }}</strong><br>
+                                {% for part in fault_parts[1:] if part|trim %}
+                                    {{ part|trim }}<br>
+                                {% endfor %}
+                            {% else %}
+                                {{ tag[2] }}
+                            {% endif %}
+                        {% else %}
+                            ללא תיאור
+                        {% endif %}
+                    </p>
+                    <p><strong>תקלה מאומתת:</strong>
+                        {{ is_verified_fault if is_verified_fault == "כן" else "לא" }}
+                    </p>
+                    <p><strong>פעולות שבוצעו:</strong>
+                        {% if tag[3] %}
+                            <br>
+                            {% set actions = tag[3].split('\n') %}
+                            {% for action in actions if action|trim %}
+                                {{ action|trim }}<br>
+                            {% endfor %}
+                        {% else %}
+                            ללא פעולות
+                        {% endif %}
+                    </p>
+                    <p><strong>תוצאות בדיקות:</strong>
+                        {% if test_results %}
+                            <br>
+                            {% for result in test_results %}
+                                {{ result }}<br>
+                            {% endfor %}
+                        {% else %}
+                            לא זמין
+                        {% endif %}
+                    </p>
+                    <p><strong>מבצע:</strong> {{ performer }}</p>
+                    <p><strong>בודק:</strong> {{ checker if checker else 'לא זמין' }}</p>
+                    <p><strong>סטטוס פריט:</strong>
+                        {% if item_statuses and item_statuses|length > 0 %}
+                            {{ item_statuses | join(', ') }}
+                        {% else %}
+                            הפריט אינו ממ"ש, ננ"ת או ננ"ש
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="right-panel" style="min-width: 220px; max-width: 340px; text-align:center;">
+                    {% if final_check_image %}
+                        <div style="border: 3px solid #6366f1; border-radius: 12px; padding: 12px; background: #f0f4ff;">
+                            <div style="font-size:1.1rem; font-weight:600; color:#6366f1; margin-bottom:8px;">דף בדיקות סופיות למק"ט</div>
+                            {% if final_check_image.endswith('.pdf') %}
+                                <a href="/static/final_checks/{{ final_check_image }}" target="_blank" class="btn btn-outline-primary btn-sm mt-2">הצג PDF</a>
+                                <p style="font-size:0.9rem; color:#666; margin-top:8px;">למק"ט זה יש קובץ PDF - לא ניתן לצייר עליו</p>
+                            {% else %}
+                                <a href="/static/final_checks/{{ final_check_image }}" target="_blank">
+                                    <img src="/static/final_checks/{{ final_check_image }}" alt="דף בדיקות" style="max-width:350px; max-height:350px; border-radius:8px; border:2px solid #818cf8; margin-top:8px; display:block; margin-left:auto; margin-right:auto; box-shadow:0 2px 12px #818cf855;">
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <button class="confirmation-button" id="confirm-checks">ביצוע בדיקות סופיות</button>
+        </div>
+        <form method="POST" style="margin-top: 24px;">
+            <div class="form-group">
+                <label>בודק: <span style="color:red;">*</span></label>
+                <select class="form-control" name="checker" required>
+                    <option value="">בחר בודק...</option>
+                    {% for member in check_members %}
+                    <option value="{{ member.name }} ({{ member.id_number }})">
+                        {{ member.name }} - {{ member.id_number }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>סטטוס סופי:</label>
+                <select class="form-control" name="status" required>
+                    <option value="שמיש">שמיש</option>
+                    <option value="תקול">תקול</option>
+                </select>
+            </div>
+            {% if request.args.get('retro') %}
+            <div class="form-group">
+                <label for="retro_close_date" style="letter-spacing:1px;font-weight:600;color:#b45309;">
+                    <i class="fas fa-history"></i> סגור תג ברטרו – בחר תאריך סגירה:
+                </label>
+                <input type="date" id="retro_close_date" name="retro_close_date" class="form-control" value="{{ (request.form.get('retro_close_date') or current_date or '') }}" required style="max-width:250px;" data-date-opened="{{ date_opened if date_opened else '' }}">
+                <small class="form-text text-muted">בחר את התאריך בו התג סיים להיות בצוות בפועל. לא ניתן לבחור תאריכים עתידיים או לפני תאריך הפתיחה.</small>
+            </div>
+            {% endif %}
+            <button type="submit" class="btn btn-danger" id="close-tag-btn" disabled>סגור תג</button>
+        </form>
+    {% endif %}
+    <a href="{{ url_for('main_index') }}" class="btn btn-secondary mt-3">חזור לעמוד הראשי</a>
+    <div id="success-alert" class="alert alert-success" role="alert" style="display: none;">
+        התג נסגר בהצלחה!
+    </div>
+</div>
+
+<!-- מודאל אישור מותאם (רק אם אין תמונה) -->
+{% if not final_check_image %}
+<div id="custom-confirm" class="modal">
+  <div class="modal-content">
+    <p>האם אתה מאשר שביצעת את כל הבדיקות?</p>
+    <div class="modal-buttons">
+      <button id="confirm-yes" class="btn btn-success">אישור</button>
+      <button id="confirm-no" class="btn btn-danger">ביטול</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- מודאל ציור על תמונה (אם יש תמונה ולא PDF) -->
+{% if final_check_image and not final_check_image.endswith('.pdf') %}
+<div id="drawing-modal" class="modal" style="display: none;" data-tag-id="{{ tag[0] if tag else '' }}" data-save-url="{{ url_for('save_final_check_snapshot', tag_id=tag[0]) if tag else '' }}">
+  <div class="modal-content drawing-modal-content">
+    <div class="drawing-header">
+      <h3>סמן בדיקות על גבי התמונה</h3>
+      <p class="drawing-subtitle">לחץ עם כפתור שמאל כדי להוסיף ✔ ולחץ עם כפתור ימין כדי להוסיף ✖. יש לסמן לפני שמירה.</p>
+    </div>
+    <div class="drawing-controls">
+      <div class="zoom-buttons">
+        <button type="button" id="zoom-out" class="btn btn-light zoom-btn" title="הקטן זום"><i class="fas fa-search-minus"></i></button>
+        <span id="zoom-level" class="zoom-level">100%</span>
+        <button type="button" id="zoom-in" class="btn btn-light zoom-btn" title="הגדל זום"><i class="fas fa-search-plus"></i></button>
+        <button type="button" id="zoom-reset" class="btn btn-light zoom-btn" title="איפוס זום"><i class="fas fa-compress"></i></button>
+      </div>
+      <div id="zoom-warning" class="zoom-warning" style="display:none;">
+        <i class="fas fa-info-circle"></i> לא ניתן לשנות זום לאחר שהתחלת לסמן.
+      </div>
+    </div>
+    <div class="drawing-canvas-wrapper">
+      <img id="check-image" src="/static/final_checks/{{ final_check_image }}" alt="דף בדיקות" style="display: none;">
+      <canvas id="drawing-canvas" 
+              data-text-map='[
+                {
+                  "id": "serial_number",
+                  "text": "{{ serial_number }}",
+                  "x": 210,
+                  "y": 225,
+                  "fontSize": 22,
+                  "fontFamily": "Rubik",
+                  "color": "#000000",
+                  "bold": true,
+                  "background": "none",
+                  "lineSpacing": 6
+                },
+                {
+                  "id": "performer",
+                  "text": "{{ performer }}",
+                  "x": 780,
+                  "y": 775,
+                  "fontSize": 20,
+                  "fontFamily": "Assistant",
+                  "color": "#000000",
+                  "bold": true,
+                  "background": "none",
+                  "lineSpacing": 4
+                },
+                {
+                  "id": "date_opened_right",
+                  "text": "{{ date_opened }}",
+                  "x": 780,
+                  "y": 825,
+                  "fontSize": 18,
+                  "fontFamily": "Rubik",
+                  "color": "#000000",
+                  "bold": true,
+                  "background": "none",
+                  "lineSpacing": 6
+                },
+                {
+                  "id": "date_opened_left",
+                  "text": "{{ date_opened }}",
+                  "x": 340,
+                  "y": 828,
+                  "fontSize": 18,
+                  "fontFamily": "Rubik",
+                  "color": "#000000",
+                  "bold": true,
+                  "background": "none",
+                  "lineSpacing": 6
+                },
+                {
+                  "id": "checker",
+                  "text": "{{ checker }}",
+                  "x": 340,
+                  "y": 778,
+                  "fontSize": 18,
+                  "fontFamily": "Rubik",
+                  "color": "#000000",
+                  "bold": true,
+                  "background": "none",
+                  "lineSpacing": 6
+                }
+              ]'
+              class="drawing-canvas"></canvas>
+              
+    </div>
+    <div class="drawing-actions">
+      <button id="clear-drawing" class="btn btn-warning" style="margin-left: 10px;">
+        <i class="fas fa-eraser"></i> נקה סימונים
+      </button>
+      <button id="save-drawing" class="btn btn-success" disabled>
+        <i class="fas fa-check"></i> שמור וצא
+      </button>
+      <button id="cancel-drawing" class="btn btn-secondary" style="margin-right: 10px;">
+        <i class="fas fa-times"></i> ביטול
+      </button>
+    </div>
+    <div id="drawing-warning" style="text-align: center; margin-top: 10px; color: #dc3545; font-weight: 600; display: none;">
+      <i class="fas fa-exclamation-triangle"></i> יש לסמן לפחות סימון אחד לפני שמירה
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/close_tag.js"></script>
+<script>
+    // הגבלת בחירת תאריכים עתידיים וקודם לפתיחה בסגירה רטרואקטיבית
+    document.addEventListener('DOMContentLoaded', function() {
+        const retroDateInput = document.getElementById('retro_close_date');
+        if (retroDateInput) {
+            // הגדר את התאריך המקסימלי לתאריך היום
+            const today = new Date().toISOString().split('T')[0];
+            retroDateInput.setAttribute('max', today);
+            
+            // קבל את תאריך הפתיחה מה-data attribute והגדר min
+            const dateOpenedStr = retroDateInput.getAttribute('data-date-opened');
+            console.log('DEBUG JS: date_opened from attribute:', dateOpenedStr);
+            if (dateOpenedStr && dateOpenedStr.trim()) {
+                try {
+                    let dateOpened = null;
+                    const cleanStr = dateOpenedStr.trim();
+                    
+                    // נסה לפרסר את תאריך הפתיחה
+                    // אם זה בפורמט YYYY-MM-DD (או YYYY-MM-DD HH:MM:SS)
+                    if (cleanStr.match(/^\d{4}-\d{2}-\d{2}/)) {
+                        dateOpened = cleanStr.substring(0, 10);
+                        console.log('DEBUG JS: Parsed as YYYY-MM-DD:', dateOpened);
+                    }
+                    // אם זה בפורמט DD/MM/YYYY או DD-MM-YYYY
+                    else if (cleanStr.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{4}/)) {
+                        const parts = cleanStr.substring(0, 10).split(/[\/\-]/);
+                        if (parts.length === 3) {
+                            // המר מ-DD/MM/YYYY ל-YYYY-MM-DD
+                            // ודא שהחודש והיום הם 2 ספרות
+                            const day = parts[0].padStart(2, '0');
+                            const month = parts[1].padStart(2, '0');
+                            const year = parts[2];
+                            dateOpened = year + '-' + month + '-' + day;
+                            console.log('DEBUG JS: Converted from DD/MM/YYYY to:', dateOpened);
+                        }
+                    }
+                    
+                    if (dateOpened) {
+                        // ודא שהתאריך תקין לפני הגדרת min
+                        const testDate = new Date(dateOpened + 'T00:00:00');
+                        if (!isNaN(testDate.getTime())) {
+                            retroDateInput.setAttribute('min', dateOpened);
+                            console.log('DEBUG JS: Successfully set min date to:', dateOpened);
+                            // ודא שהערך הנוכחי (אם יש) לא קטן מ-min
+                            if (retroDateInput.value && retroDateInput.value < dateOpened) {
+                                retroDateInput.value = '';
+                                console.log('DEBUG JS: Cleared invalid value that was before min date');
+                            }
+                        } else {
+                            console.warn('DEBUG JS: Invalid date format after conversion:', dateOpened);
+                        }
+                    } else {
+                        console.warn('DEBUG JS: Could not parse date_opened:', dateOpenedStr);
+                    }
+                } catch (e) {
+                    console.error('DEBUG JS: Error parsing date_opened:', dateOpenedStr, e);
+                }
+            } else {
+                console.warn('DEBUG JS: date_opened is empty or missing');
+            }
+            
+            // הוסף validation נוסף - בדוק בכל שינוי של התאריך
+            retroDateInput.addEventListener('change', function() {
+                const selectedDate = this.value;
+                const minDate = this.getAttribute('min');
+                const maxDate = this.getAttribute('max');
+                
+                if (selectedDate) {
+                    if (minDate && selectedDate < minDate) {
+                        alert(`לא ניתן לבחור תאריך לפני תאריך הפתיחה (${minDate}).`);
+                        this.value = '';
+                        this.focus();
+                    } else if (maxDate && selectedDate > maxDate) {
+                        alert(`לא ניתן לבחור תאריך עתידי.`);
+                        this.value = '';
+                        this.focus();
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

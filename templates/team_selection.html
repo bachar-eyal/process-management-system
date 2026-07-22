@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תגים זה לא הכל</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/fontawesome.min.css">
+    <link rel="icon" type="image/x-icon" href="/static/cat_image.png">
+    <style>
+        /* Google Fonts - Dancing Script - הורד מקומי */
+        @font-face {
+            font-family: 'Dancing Script';
+            font-style: normal;
+            font-weight: 400;
+            src: url('/static/fonts/DancingScript-Regular.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Dancing Script';
+            font-style: normal;
+            font-weight: 600;
+            src: url('/static/fonts/DancingScript-SemiBold.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Dancing Script';
+            font-style: normal;
+            font-weight: 700;
+            src: url('/static/fonts/DancingScript-Bold.woff2') format('woff2');
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            padding: 2rem 0;
+        }
+        
+        .header-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .header-card h1 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+                 .header-card p {
+             color: #666;
+             font-size: 1.1rem;
+             margin-bottom: 0;
+         }
+         
+         .search-card {
+             background: rgba(255, 255, 255, 0.95);
+             border-radius: 20px;
+             padding: 1.5rem;
+             margin-bottom: 2rem;
+             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+         }
+        
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .team-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        
+        .team-card h3 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .team-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .team-date {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-select-team {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-select-team:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .create-team-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .create-team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .create-team-card h3 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .create-team-card p {
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        .btn-create-team {
+            background: white;
+            color: #f5576c;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-create-team:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+            color: #f5576c;
+        }
+        
+        .no-teams-message {
+            background: white;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .no-teams-message i {
+            font-size: 4rem;
+            color: #667eea;
+        }
+        
+        /* Floating Admin Button - Redesigned */
+        .floating-admin-btn {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .floating-admin-btn:hover {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+            color: white;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        
+        .floating-admin-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Enhanced Modal Styles */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            border: none;
+            padding: 1.5rem 2rem;
+            position: relative;
+        }
+        
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+            pointer-events: none;
+        }
+        
+        .modal-header h5 {
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .modal-header .close {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: #fff;
+            opacity: 0.9;
+            transition: all 0.3s ease;
+            padding: 0;
+            margin: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .modal-header .close::before {
+            content: '×';
+            font-size: 1.8rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .modal-header .close span {
+            display: none;
+        }
+        
+        .modal-header .close:hover {
+            opacity: 1;
+            transform: scale(1.2);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .password-toggle {
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+        }
+        
+        .password-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(13, 202, 240, 0.1);
+        }
+        
+        .password-text {
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+        
+        .modal-header .close:focus {
+            box-shadow: none;
+            outline: none;
+        }
+        
+        .modal-body {
+            padding: 2.5rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .form-control {
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            padding: 1rem 1.2rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.3rem rgba(102, 126, 234, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 1.5rem;
+            color: #212529;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+            background: linear-gradient(135deg, #e0a800 0%, #ffc107 100%);
+        }
+        
+        .btn-danger.btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .btn-warning.btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .team-management-item {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .team-management-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .team-management-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .team-management-item h5 {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .team-management-item small {
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        /* Error Message Styling */
+        .error-message {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            animation: slideInDown 0.5s ease;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Success Message Styling */
+        .success-message {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            animation: slideInDown 0.5s ease;
+        }
+        
+        .no-teams-message h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .no-teams-message p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .teams-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-card {
+                padding: 1.5rem;
+            }
+            
+            .team-card {
+                padding: 1rem;
+            }
+            
+            .info-cards {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+                 /* אפקטי hover לשדות הקלט */
+         .form-control:focus {
+             border-color: #667eea !important;
+             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+             transform: translateY(-2px);
+         }
+         
+         .search-card .form-control:hover {
+             border-color: #667eea;
+             transform: translateY(-1px);
+             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+         }
+        
+        /* אפקטי hover לכרטיסי מידע */
+        .info-card {
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+                 <!-- כותרת ראשית -->
+         <div class="header-card">
+             <!-- לוגו בפינה הימנית העליונה -->
+             <div style="position: absolute; top: 45px; right: 200px; width: 60px; height: 60px;">
+                 <img src="/static/logo_108.png" alt="לוגו" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+             </div>
+             
+             <h1 style="font-family: 'Dancing Script', cursive; font-size: 3rem; color: #2c3e50; margin-bottom: 0.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); font-weight: 700;">
+                 <i class="fas fa-tags" style="color: #667eea; margin-left: 0.5rem;"></i> ניהול תגי תהליך
+             </h1>
+             <h2 style="font-family: 'Dancing Script', cursive; font-size: 2.2rem; color: #667eea; font-weight: 600; margin: 1rem 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
+                 <i class="fas fa-users" style="margin-left: 0.5rem;"></i> בחירת צוות
+             </h2>
+             
+             <!-- הצגת שם המפתח -->
+             <div style="margin-top: 1.5rem; text-align: center;">
+                 <p style="margin: 0; font-family: 'Palace Script MT', cursive; font-size: 18px; color: #666;">
+                     פותח ועוצב על ידי
+                     <span style="margin-right: 12px; font-size: 28px; font-weight: bold; color: #222;">Eyal Bachar</span>
+                 </p>
+             </div>
+             
+             <!-- הודעות מידע על המערכת -->
+             <div style="margin-top: 2rem; text-align: center;">
+                 <div class="info-alert" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 1.5rem; border-radius: 15px; margin-bottom: 1rem; font-weight: 500; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                     <i class="fas fa-info-circle" style="margin-left: 0.5rem;"></i>
+                     <strong>מערכת מוגנת!</strong> יצירת צוות חדש דורשת קוד מאושר ממנהל עליון
+                 </div>
+                 
+                 <div class="info-alert" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem 1.5rem; border-radius: 15px; margin-bottom: 1rem; font-weight: 500; box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);">
+                     <i class="fas fa-shield-alt" style="margin-left: 0.5rem;"></i>
+                      כל צוות מקבל מסד נתונים נפרד ומאובטח
+                 </div>
+             </div>
+            
+                         <!-- חיפוש צוותים -->
+             <div style="text-align: right; margin-top: 1rem;">
+                 <label for="teamSearch" style="color: #667eea; font-weight: 600; margin-bottom: 0.5rem; display: block;">
+                     <i class="fas fa-search"></i> חיפוש צוות
+                 </label>
+                 <input type="text" class="form-control" id="teamSearch" 
+                 placeholder="הקלד שם צוות לחיפוש..." 
+                 style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem; font-size: 1rem; transition: all 0.3s ease; text-align: right;">
+             </div>
+        </div>
+        
+        <!-- רשימת צוותים -->
+        {% if teams %}
+        <div class="teams-grid">
+            {% for team in teams %}
+            <div class="team-card">
+                <h3>
+                    <i class="fas fa-users"></i>
+                    {{ team[1] }}
+                </h3>
+                
+                <div class="team-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    נוצר ב: {{ team[2][:10] }}
+                </div>
+                
+                {% set stats = team_stats.get(team[0]) %}
+                {% if stats %}
+                <div class="team-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats['total_tags'] }}</div>
+                        <div class="stat-label">תגים</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats['closed_tags'] }}</div>
+                        <div class="stat-label">סגורים</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="{{ url_for('select_team') }}">
+                    <input type="hidden" name="team_id" value="{{ team[0] }}">
+                    <button type="submit" class="btn btn-select-team">
+                        <i class="fas fa-sign-in-alt"></i>
+                        בחר צוות זה
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- הודעה כשאין צוותים -->
+        <div class="no-teams-message">
+            <i class="fas fa-users"></i>
+            <h3>אין צוותים עדיין</h3>
+            <p>צור את הצוות הראשון כדי להתחיל לעבוד במערכת</p>
+        </div>
+        {% endif %}
+        
+        <!-- כרטיס יצירת צוות חדש -->
+        <div class="create-team-card">
+            <h3><i class="fas fa-plus-circle"></i> צור צוות חדש</h3>
+            <p>צור צוות חדש עם מסד נתונים משלו ומשתמש admin</p>
+            <button type="button" class="btn btn-create-team" data-toggle="modal" data-target="#createTeamModal">
+                <i class="fas fa-plus"></i>
+                צור צוות חדש
+            </button>
+        </div>
+        
+        
+    </div>
+    
+    <!-- Modal יצירת צוות חדש -->
+    <div class="modal fade" id="createTeamModal" tabindex="-1" role="dialog" aria-labelledby="createTeamModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; border: none; padding: 2rem;">
+                    <h4 class="modal-title" id="createTeamModalLabel" style="font-weight: 700; margin: 0;">
+                        <i class="fas fa-plus-circle" style="margin-left: 0.5rem;"></i> צור צוות חדש
+                    </h4>
+                    
+                </div>
+                <form method="POST" action="{{ url_for('create_team') }}" id="createTeamForm">
+                    <div class="modal-body" style="padding: 2rem;">
+                        {% if error %}
+                        <div class="alert alert-danger" style="border-radius: 15px; border: none; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: 500;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {% if 'קוד לא קיים' in error %}
+                                <strong>קוד לא תקין!</strong> הקוד שהזנת לא קיים במערכת. אנא בדוק את הקוד ונסה שוב.
+                            {% elif 'קוד כבר בשימוש' in error %}
+                                <strong>קוד כבר בשימוש!</strong> הקוד הזה כבר שימש ליצירת צוות אחר. אנא השתמש בקוד חדש.
+                            {% else %}
+                                {{ error }}
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if success %}
+                        <div class="alert alert-success" style="border-radius: 15px; border: none; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; font-weight: 500;">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>צוות נוצר בהצלחה! 🎉</strong><br>
+                            {{ success }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label for="team_name" style="color: #667eea; font-weight: 600; margin-bottom: 0.5rem;">
+                                        <i class="fas fa-users" style="margin-left: 0.5rem;"></i> שם הצוות
+                                    </label>
+                                    <input type="text" class="form-control" id="team_name" name="team_name" 
+                                           placeholder="למשל: צוות אלקטרוניקה" required
+                                           style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem; font-size: 1rem; transition: all 0.3s ease;">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label for="admin_username" style="color: #667eea; font-weight: 600; margin-bottom: 0.5rem;">
+                                        <i class="fas fa-user-shield" style="margin-left: 0.5rem;"></i> שם משתמש Admin
+                                    </label>
+                                    <input type="text" class="form-control" id="admin_username" name="admin_username" 
+                                           placeholder="הכנס שם משתמש" required
+                                           style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem; font-size: 1rem; transition: all 0.3s ease;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label for="admin_password" style="color: #667eea; font-weight: 600; margin-bottom: 0.5rem;">
+                                        <i class="fas fa-lock" style="margin-left: 0.5rem;"></i> סיסמה Admin
+                                    </label>
+                                    <input type="password" class="form-control" id="admin_password" name="admin_password" 
+                                           placeholder="הכנס סיסמה חזקה" required
+                                           style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem; font-size: 1rem; transition: all 0.3s ease;"
+                                           onkeyup="checkPasswordStrength(this.value)">
+                                    <div id="password-strength" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label for="creation_code" style="color: #667eea; font-weight: 600; margin-bottom: 0.5rem;">
+                                        <i class="fas fa-key" style="margin-left: 0.5rem;"></i> קוד יצירת צוות
+                                    </label>
+                                    <input type="text" class="form-control" id="creation_code" name="creation_code" 
+                                           placeholder="הכנס קוד יצירת צוות" required
+                                           style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem; font-size: 1rem; transition: all 0.3s ease;">
+                                    <small class="form-text text-muted" style="color: #6c757d; font-size: 0.85rem;">
+                                        <i class="fas fa-info-circle"></i> קוד זה נדרש ליצירת צוות חדש
+                                    </small>
+                                    <div id="code-validation-message" class="mt-2" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-cards" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;">
+                            <div class="info-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 15px; text-align: center;">
+                                <i class="fas fa-user-check" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                                <h6 style="font-weight: 600; margin-bottom: 0.5rem;">פרטי התחברות</h6>
+                                <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">אלה יהיו פרטי ההתחברות שלך לצוות החדש</p>
+                            </div>
+                            
+                            <div class="info-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 15px; text-align: center;">
+                                <i class="fas fa-database" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                                <h6 style="font-weight: 600; margin-bottom: 0.5rem;">מסד נתונים נפרד</h6>
+                                <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">הצוות יקבל מסד נתונים משלו עם כל הטבלאות</p>
+                            </div>
+                        </div>
+                        
+                        <!-- הודעות חשובות על הקוד -->
+                        <div style="margin-top: 2rem;">
+                            <div class="alert alert-warning" style="border-radius: 15px; border: none; background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; font-weight: 500; padding: 1rem 1.5rem;">
+                                <i class="fas fa-exclamation-triangle" style="margin-left: 0.5rem;"></i>
+                                <strong>חשוב!</strong> הקוד חייב להיות תקין ולא בשימוש. קוד לא תקין יגרום לשגיאה ביצירת הצוות.
+                            </div>
+                            
+                            <div class="alert alert-info" style="border-radius: 15px; border: none; background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); color: white; font-weight: 500; padding: 1rem 1.5rem; margin-top: 1rem;">
+                                <i class="fas fa-lightbulb" style="margin-left: 0.5rem;"></i>
+                                 אם אין לך קוד, פנה למנהל המערכת לקבלת קוד חדש.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background: #f8f9fa; border-radius: 0 0 20px 20px; border: none; padding: 1.5rem 2rem;">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                style="border-radius: 25px; padding: 0.75rem 1.5rem; font-weight: 600; border: none; background: #6c757d;">
+                            <i class="fas fa-times" style="margin-left: 0.5rem;"></i> ביטול
+                        </button>
+                        <button type="submit" class="btn btn-primary"
+                                style="border-radius: 25px; padding: 0.75rem 2rem; font-weight: 600; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);">
+                            <i class="fas fa-plus" style="margin-left: 0.5rem;"></i> צור צוות
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Floating Admin Button -->
+    <button class="floating-admin-btn" onclick="showAdminLogin()" title="ניהול צוותים">
+        <i class="fas fa-cog"></i>
+    </button>
+    
+    <!-- Admin Login Modal -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-shield"></i> התחברות מנהל עליון
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="adminLoginError" class="error-message" style="display: none;"></div>
+                    <form id="adminLoginForm">
+                        <div class="form-group">
+                            <label for="adminUsername">
+                                <i class="fas fa-user"></i> שם משתמש:
+                            </label>
+                            <input type="text" class="form-control" id="adminUsername" 
+                                   placeholder="הכנס שם משתמש" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminPassword">
+                                <i class="fas fa-lock"></i> סיסמה:
+                            </label>
+                            <input type="password" class="form-control" id="adminPassword" 
+                                   placeholder="הכנס סיסמה" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger btn-block">
+                            <i class="fas fa-sign-in-alt"></i> התחבר למערכת
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team Management Modal -->
+    <div class="modal fade" id="teamManagementModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-users-cog"></i> ניהול צוותים
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs for different management sections -->
+                    <ul class="nav nav-tabs" id="managementTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="teams-tab" data-toggle="tab" href="#teams" role="tab">
+                                <i class="fas fa-users"></i> ניהול צוותים
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="codes-tab" data-toggle="tab" href="#codes" role="tab">
+                                <i class="fas fa-key"></i> ניהול קודי יצירת צוות
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="managementTabContent">
+                        <!-- Teams Management Tab -->
+                        <div class="tab-pane fade show active" id="teams" role="tabpanel">
+                            <div id="teamsManagementList">
+                                <div class="text-center">
+                                    <div class="loading-spinner"></div>
+                                    <p class="mt-2">טוען צוותים...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Team Creation Codes Tab -->
+                        <div class="tab-pane fade" id="codes" role="tabpanel">
+                            <!-- הודעות מידע על הקודים -->
+                            <div class="alert alert-info" style="border-radius: 15px; border: none; background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); color: white; font-weight: 500; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+                                <i class="fas fa-info-circle" style="margin-left: 0.5rem;"></i>
+                                <strong>מידע על הקודים:</strong> כל קוד הוא חד פעמי ונמחק אוטומטית לאחר שימוש ביצירת צוות.
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <button type="button" class="btn btn-success" onclick="generateNewCode()">
+                                        <i class="fas fa-plus"></i> צור קוד חדש
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id="codesManagementList">
+                                <div class="text-center">
+                                    <div class="loading-spinner"></div>
+                                    <p class="mt-2">טוען קודים...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Team Modal -->
+    <div class="modal fade" id="editTeamModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit"></i> עריכת צוות
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                                 <div class="modal-body">
+                     <div id="editTeamMessageContainer" class="mb-3"></div>
+                     <form id="editTeamForm">
+                         <input type="hidden" id="editTeamId">
+                         <div class="form-group">
+                             <label for="editTeamName">
+                                 <i class="fas fa-users"></i> שם הצוות:
+                             </label>
+                             <input type="text" class="form-control" id="editTeamName" 
+                                    placeholder="הכנס שם חדש לצוות" required>
+                         </div>
+                         <button type="submit" class="btn btn-warning btn-block">
+                             <i class="fas fa-save"></i> שמור שינויים
+                         </button>
+                     </form>
+                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/jquery.min.js"></script>
+    <script src="/static/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/alert.js"></script>
+    
+    <script>
+        // Delete team function - defined early so it's available when buttons are created
+        function deleteTeam(teamId, teamName) {
+            if (confirm(`האם אתה בטוח שברצונך למחוק את הצוות "${teamName}"?\n\nזה ימחק את כל הנתונים של הצוות!`)) {
+                fetch('/delete_team', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        team_id: teamId
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        loadTeamsForManagement();
+                        // הצג הודעת הצלחה
+                        showSuccessAlert(`🗑️ הצוות "${teamName}" נמחק בהצלחה!`);
+                    } else {
+                        if (data.error === 'אין הרשאה') {
+                            showErrorAlert('❌ אין לך הרשאה לבצע פעולה זו. אנא התחבר מחדש כמנהל עליון.');
+                        } else {
+                            showErrorAlert('❌ שגיאה במחיקת הצוות: ' + (data.error || 'שגיאה לא ידועה'));
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorAlert('❌ שגיאה במחיקת הצוות: ' + error.message);
+                });
+            }
+        }
+        
+        // Edit team function - defined early so it's available when buttons are created
+        function editTeam(teamId, teamName) {
+            console.log('====================================');
+            console.log('פתיחת עריכת צוות');
+            console.log('====================================');
+            console.log('teamId:', teamId);
+            console.log('teamName:', teamName);
+            
+            // הצג הודעת אישור
+            if (confirm(`האם אתה בטוח שברצונך לערוך את הצוות "${teamName}"?`)) {
+                // מלא את הנתונים במודל העריכה
+                document.getElementById('editTeamId').value = teamId;
+                document.getElementById('editTeamName').value = teamName;
+                
+                // פתח את מודל העריכה (בלי לסגור את מודל הניהול)
+                $('#editTeamModal').modal('show');
+            }
+            console.log('מודל עריכה נפתח');
+        }
+        
+        // הצג הודעות flash אם יש
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        $(document).ready(function() {
+            {% for category, message in messages %}
+            {% if category == 'success' %}
+            showSuccessAlert('{{ message }}');
+            {% elif category == 'error' %}
+            showErrorAlert('{{ message }}');
+            {% endif %}
+            {% endfor %}
+        });
+        {% endif %}
+        {% endwith %}
+        
+        // אנימציה לכרטיסי צוות
+        $(document).ready(function() {
+            $('.team-card').each(function(index) {
+                $(this).css('animation-delay', (index * 0.1) + 's');
+                $(this).addClass('animate__animated animate__fadeInUp');
+            });
+            
+            // וודא שאף מודל לא פתוח בטעות
+            $('.modal').modal('hide');
+            
+            // בדיקה נוספת - סגור את כל המודלים
+            setTimeout(function() {
+                $('.modal').modal('hide');
+            }, 100);
+        });
+        
+        // בדיקת עוצמת סיסמה
+        function checkPasswordStrength(password) {
+            const strengthDiv = document.getElementById('password-strength');
+            let strength = 0;
+            let message = '';
+            let color = '';
+            
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[A-Za-z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            switch(strength) {
+                case 0:
+                case 1:
+                    message = 'חלשה מאוד';
+                    color = '#dc3545';
+                    break;
+                case 2:
+                    message = 'חלשה';
+                    color = '#fd7e14';
+                    break;
+                case 3:
+                    message = 'בינונית';
+                    color = '#ffc107';
+                    break;
+                case 4:
+                    message = 'חזקה';
+                    color = '#28a745';
+                    break;
+                case 5:
+                    message = 'חזקה מאוד';
+                    color = '#20c997';
+                    break;
+            }
+            
+            strengthDiv.innerHTML = `<i class="fas fa-shield-alt"></i> עוצמת סיסמה: <span style="color: ${color}; font-weight: 600;">${message}</span>`;
+        }
+        
+        // פונקציונליות חיפוש צוותים
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('teamSearch');
+            const teamCards = document.querySelectorAll('.team-card');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                teamCards.forEach(card => {
+                    const teamName = card.querySelector('h3').textContent.toLowerCase();
+                    if (teamName.includes(searchTerm)) {
+                        card.style.display = 'block';
+                        card.style.opacity = '1';
+                    } else {
+                        card.style.display = 'none';
+                        card.style.opacity = '0';
+                    }
+                });
+                
+                // הצג הודעה אם לא נמצאו תוצאות
+                const visibleCards = document.querySelectorAll('.team-card[style*="display: block"]');
+                const noResultsMessage = document.getElementById('noResultsMessage');
+                
+                if (visibleCards.length === 0 && searchTerm !== '') {
+                    if (!noResultsMessage) {
+                        const message = document.createElement('div');
+                        message.id = 'noResultsMessage';
+                        message.className = 'no-teams-message';
+                        message.innerHTML = `
+                            <i class="fas fa-search"></i>
+                            <h3>לא נמצאו צוותים</h3>
+                            <p>לא נמצאו צוותים התואמים לחיפוש "${searchTerm}"</p>
+                        `;
+                        document.querySelector('.teams-grid').appendChild(message);
+                    }
+                } else {
+                    if (noResultsMessage) {
+                        noResultsMessage.remove();
+                    }
+                }
+            });
+            
+            // נקה חיפוש עם Escape
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.value = '';
+                    this.dispatchEvent(new Event('input'));
+                    this.blur();
+                }
+            });
+        });
+        
+        // Admin Management Functions
+        function showAdminLogin() {
+            $('#adminLoginModal').modal('show');
+        }
+        
+                         // רענן את הדף הראשי כשסוגרים את מודל הניהול
+        $('#teamManagementModal').on('hidden.bs.modal', function () {
+            console.log('מודל ניהול נסגר - מרענן את הדף הראשי');
+            // וודא שאף מודל לא פתוח לפני רענון
+            $('.modal').modal('hide');
+            setTimeout(() => {
+                // בדיקה נוספת - וודא שאף מודל לא פתוח
+                $('.modal').modal('hide');
+                location.reload();
+            }, 100);
+        });
+        
+        // Show success message
+        function showSuccessMessage(message) {
+            const container = document.getElementById('teamsManagementList');
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            
+            // הוסף את ההודעה בתחילת הקונטיינר
+            container.insertBefore(successDiv, container.firstChild);
+            
+            // הסר את ההודעה אחרי 3 שניות
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 3000);
+        }
+        
+        // Password toggle functionality
+        $(document).on('click', '.password-toggle', function() {
+            const passwordDisplay = $(this).closest('.password-display');
+            const passwordText = passwordDisplay.find('.password-text');
+            const icon = $(this).find('i');
+            const actualPassword = passwordDisplay.data('password');
+            
+            if (passwordText.text() === '••••••••') {
+                passwordText.text(actualPassword);
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                passwordText.text('••••••••');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+        
+        // Show message function with target container support
+        function showMessage(message, type = 'success', targetContainerId = 'teamsManagementList') {
+            const container = document.getElementById(targetContainerId);
+            if (!container) {
+                console.error(`Target container with ID '${targetContainerId}' not found for message: ${message}`);
+                return;
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i> ${message}`;
+            
+            // הוסף את ההודעה בתחילת הקונטיינר
+            container.insertBefore(messageDiv, container.firstChild);
+            
+            // הסר את ההודעה אחרי 3 שניות
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 3000);
+        }
+        
+        // Handle Admin Login - עם בדיקה למניעת כפילות
+        if (!window.adminLoginListenerAdded) {
+            window.adminLoginListenerAdded = true;
+            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+                const errorDiv = document.getElementById('adminLoginError');
+                
+                // Clear previous error
+                errorDiv.style.display = 'none';
+                
+                // שלח בקשה לשרת
+                fetch('/admin_login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // הצג הודעת הצלחה
+                        showSuccessAlert('🔐 התחברות מנהל עליון הצליחה! ברוך הבא למערכת הניהול.');
+                        
+                        // סגור את כל המודלים קודם
+                        $('.modal').modal('hide');
+                        
+                        setTimeout(() => {
+                            loadTeamsForManagement();
+                            $('#teamManagementModal').modal('show');
+                        }, 200);
+                    } else {
+                        showErrorAlert(`❌ שגיאה בהתחברות: ${data.error}`);
+                        
+                        // Clear password field
+                        document.getElementById('adminPassword').value = '';
+                        document.getElementById('adminPassword').focus();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    errorDiv.style.display = 'block';
+                    showErrorAlert('שגיאה בהתחברות');
+                });
+            });
+        }
+        
+        // Load teams for management
+        function loadTeamsForManagement() {
+            console.log('====================================');
+            console.log('טוען צוותים לניהול...');
+            console.log('====================================');
+            const container = document.getElementById('teamsManagementList');
+            
+            // Show loading
+            container.innerHTML = `
+                <div class="text-center">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-2">טוען צוותים...</p>
+                </div>
+            `;
+            
+            fetch('/get_teams_for_management')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('תגובת שרת - צוותים:', data);
+                    if (data.success && data.teams) {
+                        console.log('מספר צוותים שנטענו:', data.teams.length);
+                        container.innerHTML = '';
+                        
+                        if (data.teams.length === 0) {
+                            container.innerHTML = `
+                                <div class="text-center">
+                                    <i class="fas fa-users" style="font-size: 3rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                                    <h5>אין צוותים לניהול</h5>
+                                    <p class="text-muted">לא נמצאו צוותים במערכת</p>
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        data.teams.forEach(team => {
+                            console.log('יוצר כרטיס צוות:', team.name, 'ID:', team.id);
+                            const teamDiv = document.createElement('div');
+                            teamDiv.className = 'team-management-item';
+                            teamDiv.innerHTML = `
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1">${team.name}</h5>
+                                        <small class="text-muted">נוצר: ${team.created_date}</small>
+                                        <div class="mt-2">
+                                            <small class="text-info">
+                                                <i class="fas fa-user"></i> שם משתמש: <strong>${team.global_username || 'לא זמין'}</strong>
+                                            </small><br>
+                                            <small class="text-info">
+                                                <i class="fas fa-key"></i> סיסמה: 
+                                                <span class="password-display" data-password="${team.global_password || 'לא זמין'}">
+                                                    <span class="password-text">••••••••</span>
+                                                    <button type="button" class="btn btn-sm btn-outline-info password-toggle" style="margin-left: 5px; padding: 2px 6px; font-size: 0.8rem;">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-warning btn-sm mr-2 edit-team-btn" data-team-id="${team.id}" data-team-name="${team.name}">
+                                            <i class="fas fa-edit"></i> ערוך
+                                        </button>
+                                        <button class="btn btn-danger btn-sm delete-team-btn" data-team-id="${team.id}" data-team-name="${team.name}">
+                                            <i class="fas fa-trash"></i> מחק
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            container.appendChild(teamDiv);
+                        });
+                        console.log('סיום יצירת כרטיסי צוותים');
+                        
+                        // הוסף event listeners לכפתורי עריכה ומחיקה
+                        document.querySelectorAll('.edit-team-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const teamId = this.getAttribute('data-team-id');
+                                const teamName = this.getAttribute('data-team-name');
+                                editTeam(teamId, teamName);
+                            });
+                        });
+                        
+                        document.querySelectorAll('.delete-team-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const teamId = this.getAttribute('data-team-id');
+                                const teamName = this.getAttribute('data-team-name');
+                                deleteTeam(teamId, teamName);
+                            });
+                        });
+                    } else {
+                        if (data.error === 'אין הרשאה') {
+                            showErrorAlert('❌ אין לך הרשאה לגשת לניהול צוותים. אנא התחבר מחדש כמנהל עליון.');
+                            return;
+                        }
+                        throw new Error(data.error || 'שגיאה בטעינת הצוותים');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading teams:', error);
+                    showErrorAlert(`שגיאה בטעינת הצוותים: ${error.message}`);
+                });
+        }
+        
+        // Load team creation codes for management
+        function loadTeamCodes() {
+            console.log('====================================');
+            console.log('טוען קודי יצירת צוות...');
+            console.log('====================================');
+            const container = document.getElementById('codesManagementList');
+            
+            // Show loading
+            container.innerHTML = `
+                <div class="text-center">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-2">טוען קודים...</p>
+                </div>
+            `;
+            
+            fetch('/get_team_codes')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('תגובת שרת - קודים:', data);
+                    if (data.success && data.codes) {
+                        console.log('מספר קודים שנטענו:', data.codes.length);
+                        container.innerHTML = '';
+                        
+                        if (data.codes.length === 0) {
+                            container.innerHTML = `
+                                <div class="text-center">
+                                    <i class="fas fa-key" style="font-size: 3rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                                    <h5>אין קודים לניהול</h5>
+                                    <p class="text-muted">לא נמצאו קודי יצירת צוות במערכת</p>
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Create table for codes
+                        let tableHTML = `
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>קוד</th>
+                                            <th>תאריך יצירה</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+                        
+                        data.codes.forEach(code => {
+                            console.log('מעבד קוד:', code);
+                            const codeValue = code[0] || 'לא זמין';
+                            const createdDate = code[1] || 'לא זמין';
+                            
+                            let formattedDate = 'לא זמין';
+                            if (createdDate && createdDate !== 'לא זמין') {
+                                try {
+                                    formattedDate = new Date(createdDate).toLocaleDateString('he-IL');
+                                } catch (e) {
+                                    console.error('שגיאה בפורמט תאריך:', e, createdDate);
+                                    formattedDate = createdDate;
+                                }
+                            }
+                            
+                            tableHTML += `
+                                <tr>
+                                    <td><code style="font-size: 1.1rem; font-weight: bold; color: #667eea;">${codeValue}</code></td>
+                                    <td>${formattedDate}</td>
+                                </tr>
+                            `;
+                        });
+                        
+                        tableHTML += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        
+                        container.innerHTML = tableHTML;
+                        console.log('סיום יצירת טבלת קודים');
+                    } else {
+                        if (data.error === 'אין הרשאה') {
+                            showErrorAlert('❌ אין לך הרשאה לגשת לניהול קודים. אנא התחבר מחדש כמנהל עליון.');
+                            return;
+                        }
+                        throw new Error(data.error || 'שגיאה בטעינת הקודים');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading codes:', error);
+                    showErrorAlert(`שגיאה בטעינת הקודים: ${error.message}`);
+                });
+        }
+        
+        // Generate new team creation code
+        function generateNewCode() {
+            console.log('====================================');
+            console.log('יוצר קוד חדש...');
+            console.log('====================================');
+            
+            // הצג הודעת אישור
+            if (confirm('האם אתה בטוח שברצונך ליצור קוד חדש?\n\nהקוד החדש יהיה זמין לשימוש ביצירת צוות.')) {
+                fetch('/generate_team_code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccessAlert(`🎉 קוד חדש נוצר בהצלחה: ${data.code}`);
+                        loadTeamCodes(); // Refresh the codes list
+                    } else {
+                        if (data.error === 'אין הרשאה') {
+                            showErrorAlert('❌ אין לך הרשאה ליצור קוד חדש. אנא התחבר מחדש כמנהל עליון.');
+                        } else {
+                            showErrorAlert(`❌ שגיאה ביצירת קוד: ${data.error}`);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error generating code:', error);
+                    showErrorAlert('❌ שגיאה ביצירת קוד: ' + error.message);
+                });
+            }
+        }
+        
+
+        
+        // Handle edit team form - עם בדיקה למניעת כפילות
+        if (!window.editFormListenerAdded) {
+            window.editFormListenerAdded = true;
+            const editForm = document.getElementById('editTeamForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const teamId = document.getElementById('editTeamId').value;
+                    const newName = document.getElementById('editTeamName').value.trim();
+                    
+                    if (!newName) {
+                        showErrorAlert('שם הצוות לא יכול להיות ריק');
+                        return;
+                    }
+                    
+                    console.log('====================================');
+                    console.log('שולח בקשה לעדכון צוות');
+                    console.log('====================================');
+                    console.log('נתונים:', {team_id: teamId, new_name: newName});
+                    console.log('צוות נוכחי:', teamId);
+                    console.log('שם חדש:', newName);
+                    
+                    fetch('/edit_team', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            team_id: teamId,
+                            new_name: newName
+                        })
+                    })
+                    .then(response => {
+                        console.log('תגובת שרת:', response.status);
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('תגובת שרת:', data);
+                        if (data.success) {
+                            console.log('עדכון הצליח! סוגר מודל עריכה ומראה מודל ניהול');
+                            $('#editTeamModal').modal('hide');
+                            $('#teamManagementModal').modal('show');
+                            console.log('טוען צוותים מחדש...');
+                            loadTeamsForManagement();
+                            // הצג הודעת הצלחה
+                            showSuccessAlert('✏️ שם הצוות עודכן בהצלחה!');
+                            console.log('הודעת הצלחה הוצגה');
+                        } else {
+                            console.error('שגיאה בעריכת הצוות:', data.error);
+                            if (data.error === 'אין הרשאה') {
+                                showErrorAlert('❌ אין לך הרשאה לבצע פעולה זו. אנא התחבר מחדש כמנהל עליון.');
+                            } else {
+                                showErrorAlert('❌ שגיאה בעריכת הצוות: ' + (data.error || 'שגיאה לא ידועה'));
+                            }
+                            return;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showErrorAlert('שגיאה בעריכת הצוות: ' + error.message);
+                    });
+                });
+            }
+        }
+        
+        // Tab change handler
+        $('#managementTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            const target = $(e.target).attr("href");
+            if (target === '#codes') {
+                loadTeamCodes();
+            } else if (target === '#teams') {
+                loadTeamsForManagement();
+            }
+        });
+        
+        // Add event listener for create team form
+        if (!window.createTeamFormListenerAdded) {
+            window.createTeamFormListenerAdded = true;
+            const createTeamForm = document.getElementById('createTeamForm');
+            if (createTeamForm) {
+                createTeamForm.addEventListener('submit', function(e) {
+                    // בדוק אם כל השדות מלאים
+                    const teamName = document.getElementById('team_name').value.trim();
+                    const adminUsername = document.getElementById('admin_username').value.trim();
+                    const adminPassword = document.getElementById('admin_password').value.trim();
+                    const creationCode = document.getElementById('creation_code').value.trim();
+                    
+                    if (!teamName || !adminUsername || !adminPassword || !creationCode) {
+                        e.preventDefault();
+                        showErrorAlert('❌ שגיאה! יש למלא את כל השדות כולל קוד יצירת צוות.');
+                        return false;
+                    }
+                    
+                    // הצג הודעת אישור
+                    if (!confirm('האם אתה בטוח שברצונך ליצור צוות חדש?\n\nשם הצוות: ' + teamName + '\nשם משתמש Admin: ' + adminUsername + '\n\nזה ייצור מסד נתונים חדש עבור הצוות.')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    
+                    // הצג הודעת טעינה
+                    showSuccessAlert('⏳ יוצר צוות חדש... אנא המתן עד שהמערכת תסיים את התהליך.');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

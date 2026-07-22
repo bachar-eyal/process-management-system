@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>הוספת משתמש חדש</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/fontawesome.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-user-container {
+            max-width: 420px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px 30px 30px 30px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 1s;
+        }
+        h2 {
+            text-align: center;
+            color: #22223b;
+            margin-bottom: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .form-label {
+            color: #6366f1;
+            font-weight: 500;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #c7d2fe;
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px #a5b4fc55;
+        }
+        .btn-add-user {
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #6366f133;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+        .btn-add-user:hover {
+            background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .alert {
+            text-align: center;
+            font-size: 1rem;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="add-user-container">
+        <h2>הוספת משתמש חדש</h2>
+        <form method="post" autocomplete="off">
+            <div class="mb-3">
+                <label for="username" class="form-label">שם משתמש:</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">סיסמה:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="role" class="form-label">סוג הרשאה</label>
+                <select class="form-select" id="role" name="role" required>
+                    <option value="user">משתמש רגיל</option>
+                    <option value="admin">מנהל (admin)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-add-user w-100 mb-2">הוסף משתמש <i class="fas fa-user-plus"></i></button>
+        </form>
+        <a href="/index" class="btn btn-secondary w-100" style="border-radius:8px; font-weight:600; font-size:1rem;"><i class="fas fa-home ml-2"></i> חזור לדף הבית</a>
+        <hr class="my-4">
+        <h4 class="mb-3 text-center">משתמשים קיימים</h4>
+        {% if users and users|length > 0 %}
+        <table class="table table-bordered" style="background:#f8fafc; border-radius:8px; overflow:hidden;">
+            <thead>
+                <tr>
+                    <th>שם משתמש</th>
+                    <th>הרשאה</th>
+                    <th>מחיקה</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user[1] }}</td>
+                    <td>{{ 'מנהל' if user[2]=='admin' else 'משתמש רגיל' }}</td>
+                    <td>
+                        <form method="post" style="display:inline;" onsubmit="event.preventDefault(); confirmDelete(this);">
+                            <input type="hidden" name="delete_user_id" value="{{ user[0] }}">
+                            <button type="submit" class="btn btn-delete"><i class="fas fa-trash"></i> מחק</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center text-muted">אין משתמשים למחוק.</div>
+        {% endif %}
+        <style>
+        .btn-delete {
+            background: linear-gradient(90deg, #fca5a5 0%, #f87171 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 6px 18px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-delete:hover {
+            background: linear-gradient(90deg, #f87171 0%, #fca5a5 100%);
+            transform: scale(1.05);
+        }
+        </style>
+        <script>
+        // פונקציה להצגת alert הצלחה
+        function showSuccessAlert(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success fade show';
+            alertDiv.innerHTML = message;
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: -100px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                min-width: 300px;
+                text-align: center;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                transition: top 0.3s ease;
+            `;
+            
+            // הוסף את ה-alert לגוף הדף
+            document.body.appendChild(alertDiv);
+            
+            // אנימציית כניסה
+            setTimeout(() => {
+                alertDiv.style.top = '20px';
+            }, 10);
+            
+            // אנימציית יציאה
+            setTimeout(() => {
+                alertDiv.style.top = '-100px';
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 300);
+            }, 2000);
+        }
+
+        // פונקציה להצגת alert שגיאה
+        function showErrorAlert(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger fade show';
+            alertDiv.innerHTML = message;
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: -100px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                min-width: 300px;
+                text-align: center;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                transition: top 0.3s ease;
+            `;
+            
+            // הוסף את ה-alert לגוף הדף
+            document.body.appendChild(alertDiv);
+            
+            // אנימציית כניסה
+            setTimeout(() => {
+                alertDiv.style.top = '20px';
+            }, 10);
+            
+            // אנימציית יציאה
+            setTimeout(() => {
+                alertDiv.style.top = '-100px';
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 300);
+            }, 2000);
+        }
+
+        function confirmDelete(form) {
+            if(confirm('האם אתה בטוח שברצונך למחוק משתמש זה?')) {
+                form.submit();
+            }
+        }
+
+        // הצג הודעות זמניות אם יש
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if success %}
+                showSuccessAlert({{ success|tojson }});
+            {% endif %}
+            {% if error %}
+                showErrorAlert({{ error|tojson }});
+            {% endif %}
+        });
+        </script>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,111 @@
+.actions-cell {
+    vertical-align: top;
+    padding: 8px;
+}
+
+/* עיצוב הודעת הצלחה */
+#success-alert {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    min-width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: top 0.3s ease;
+    border-radius: 8px;
+    padding: 15px 20px;
+    font-weight: 500;
+    max-width: 90%;
+}
+
+/* מצב מוצג */
+#success-alert[style*="top: 20px"] {
+    top: 20px !important;
+}
+
+/* עיצוב כפתור שינוי SKU */
+.btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+}
+
+/* כפתור קטן יותר */
+.btn-xs {
+    padding: 2px 6px;
+    font-size: 10px;
+    line-height: 1.2;
+    border-radius: 3px;
+    min-width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-xs:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+}
+
+/* עיצוב מודל שינוי SKU */
+#skuChangeModal .modal-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+#skuChangeModal .form-control-static {
+    background-color: #f8f9fa;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 0;
+}
+
+#skuChangeModal .error-message {
+    font-size: 0.875rem;
+    margin-top: 5px;
+}
+
+#skuChangeModal #skuChangeMessage {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+#skuChangeModal #skuChangeMessage i {
+    margin-left: 5px;
+}
+
+#skuChangeModal .btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+#skuChangeModal .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+}
+
+#skuChangeModal .btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+#skuChangeModal .btn-primary:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}

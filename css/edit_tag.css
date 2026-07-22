@@ -1,0 +1,152 @@
+/* עיצוב כללי - חזרה לעיצוב המקורי */
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+    text-align: right;
+    direction: rtl;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #1976d2;
+    font-weight: 500;
+    margin-bottom: 20px;
+    text-align: center; 
+    position: relative;
+    animation: glow 2s ease-in-out infinite alternate;
+    display: inline-block; 
+    margin: 0 auto; 
+    width: fit-content; 
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%); 
+    width: 0;
+    height: 2px;
+    background: linear-gradient(to left, #1976d2, #42a5f5);
+    animation: underlineCenter 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0% {
+        text-shadow: 0 0 5px rgba(25, 118, 210, 0.5), 0 0 10px rgba(25, 118, 210, 0.3);
+    }
+    100% {
+        text-shadow: 0 0 10px rgba(25, 118, 210, 0.8), 0 0 20px rgba(25, 118, 210, 0.5);
+    }
+}
+
+@keyframes underlineCenter {
+    0% {
+        width: 0;
+    }
+    50% {
+        width: 80%;
+    }
+    100% {
+        width: 0;
+    }
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.form-control {
+    border-radius: 5px;
+    font-size: 16px;
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.form-control[readonly] {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.form-group textarea.form-control {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100px;
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group textarea[readonly] {
+    background-color: #f5f5f5;
+    color: #555;
+    opacity: 0.9;
+}
+
+.checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.checkbox-inline input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+    margin-top: -10px;
+}
+
+/* עיצוב הצגת תיאור התקלה */
+.fault-description-display {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.selected-issue {
+    color: #1976d2;
+    font-weight: 500;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.additional-details {
+    color: #6c757d;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.no-description {
+    color: #6c757d;
+    font-style: italic;
+}
+
+
+
+

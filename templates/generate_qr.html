@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/generate_qr.css">
+<style>
+    .form-layout {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    font-weight: bold;
+    color: #1a2e44;
+    margin-bottom: 5px;
+}
+
+.form-row input {
+    height: 45px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.form-row input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.error-message {
+    color: red;
+    font-size: 13px;
+    display: none;
+}
+
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div style="text-align: center;">
+        <h1 style="color: #1a2e44; font-weight: 700;">יצירת קוד QR</h1>
+    </div>
+    <form method="POST" action="{{ url_for('generate_qr') }}" id="qrForm">
+        <div class="form-layout">
+            <div class="form-row">
+                <label for="serial_number">מספר סידורי:</label>
+                <input type="number" class="form-control" placeholder="הזן סידורי" name="serial_number" id="serial_number" required>
+            </div>
+    
+            <div class="form-row">
+                <label for="sku">מק"ט:</label>
+                <input type="text" class="form-control" name="sku" id="sku" list="sku-options" placeholder="הזן מקט או תיאור" value="{{ sku if sku else '' }}">
+                <datalist id="sku-options">
+                    {% for sku_code, description in approved_skus %}
+                    <option value="{{ sku_code }}">{{ description if description else 'ללא תיאור' }}</option>
+                    {% endfor %}
+                </datalist>
+                <div class="error-message" id="sku-error">המק"ט לא קיים במערכת</div>
+            </div>
+    
+            <button type="submit" class="btn btn-custom mt-3">צור QR</button>
+        </div>
+    </form>
+    
+    {% if qr_image %}
+    <div class="qr-container active" id="qrContainer">
+        <h3 style="color: #1a2e44;">ה-QR שלך:</h3>
+        <img src="data:image/png;base64,{{ qr_image }}" alt="QR Code" class="qr-image" id="qrImage">
+        <div class="info-text">
+            סרוק את הקוד או השתמש באפשרויות למטה.
+        </div>
+        <div style="margin-top: 20px;">
+            <a href="data:image/png;base64,{{ qr_image }}" download="qr_code.png" class="btn btn-custom mt-3">
+                <i class="fas fa-download"></i> הורד
+            </a>
+            <button class="btn btn-custom mt-3" onclick="printQR()">
+                <i class="fas fa-print"></i> הדפס
+            </button>
+        </div>
+    </div>
+    {% endif %}
+    <a href="{{ url_for('main_index') }}" class="btn btn-secondary mt-4">חזור לעמוד הראשי</a>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/generate_qr.js"></script>
+{% endblock %}

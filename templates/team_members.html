@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/team_members.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <a href="{{ url_for('main_index') }}" class="btn btn-secondary mb-3">חזור לעמוד הראשי</a>
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1>ניהול עובדי הצוות</h1>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>הוסף עובד חדש</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="form-inline">
+                <div class="form-group mb-2 mr-2">
+                    <input type="text" name="name" id="name" class="form-control" placeholder="שם העובד" required>
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <input type="text" name="id_number" id="id_number" class="form-control" placeholder="מספר תעודת זהות" required>
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <select name="role" id="role" class="form-control" required>
+                        <option value="">בחר תפקיד</option>
+                        <option value="performer">מבצע</option>
+                        <option value="checker">בודק</option>
+                        <option value="both">מבצע ובודק</option>
+                    </select>
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <label for="signature_canvas">חתימה:</label>
+                    <div class="signature-container">
+                        <canvas id="signature_canvas" width="300" height="150" style="border: 1px solid #ccc; cursor: crosshair; max-width: 300px;"></canvas>
+                        <input type="hidden" name="signature" id="signature">
+                        <div class="signature-controls mt-2">
+                            <button type="button" id="clear_signature" class="btn btn-secondary btn-sm">נקה חתימה</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" name="add_member" class="btn btn-primary mb-2">הוסף</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3>כל עובדי הצוות</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>שם</th>
+                        <th>מספר תעודת זהות</th>
+                        <th>תפקיד</th>
+                        <th>חתימה</th>
+                        <th>מחיקה</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr>
+                        <td>{{ member[1] }}</td>
+                        <td>{{ member[2] }}</td>
+                        <td>
+                            {% if member[3] == 'performer' %}
+                                מבצע
+                            {% elif member[3] == 'checker' %}
+                                בודק
+                            {% elif member[3] == 'both' %}
+                                מבצע ובודק
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if member[4] %}
+                                <canvas id="signature_{{ member[0] }}" class="signature-display" width="200" height="100" data-signature="{{ member[4] }}"></canvas>
+                                <button type="button" class="btn btn-sm btn-outline-primary edit-signature-btn" data-member-id="{{ member[0] }}" data-signature="{{ member[4] }}">ערוך</button>
+                            {% else %}
+                                <span class="text-muted">אין חתימה</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary edit-signature-btn" data-member-id="{{ member[0] }}" data-signature="">הוסף/ערוך</button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" name="delete_member" class="btn btn-danger btn-sm delete-btn" data-member-id="{{ member[0] }}">מחק</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal לעריכת חתימה -->
+<div class="modal fade" id="editSignatureModal" tabindex="-1" role="dialog" aria-labelledby="editSignatureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSignatureModalLabel">עריכת חתימה</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="signature-container">
+                    <canvas id="edit_signature_canvas" width="400" height="200" style="border: 1px solid #ccc; cursor: crosshair; width: 100%; max-width: 400px;"></canvas>
+                    <div class="signature-controls mt-2">
+                        <button type="button" id="clear_edit_signature" class="btn btn-secondary btn-sm">נקה חתימה</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">ביטול</button>
+                <button type="button" class="btn btn-primary" id="save_signature">שמור חתימה</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/team_members.js"></script>
+{% endblock %} 

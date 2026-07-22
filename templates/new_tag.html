@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/new_tag.css">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h1>תג תהליך חדש עבור {{ serial_number }}</h1>
+    </div>
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+    <form method="POST" id="new-tag-form">
+        <div class="form-group">
+            <label>תיאור התקלה: <span style="color:red;">*</span></label>
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" id="issue_input" name="issue_input" class="form-control mb-2" placeholder="הזן או בחר תקלה..." list="issues_list" required>
+                    <datalist id="issues_list">
+                        {% for issue_code, description in issues %}
+                        <option value="{{ description }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+            </div>
+            <textarea class="form-control" name="fault_description" id="fault_description" rows="4" placeholder="הוסף פרטים נוספים על התקלה..."></textarea>
+        </div>
+
+        <!-- טבלה לבדיקות -->
+        <div class="form-group">
+            <table class="test-table">
+                <tr>
+                    <th>בדיקה</th>
+                    <th>סימון</th>
+                </tr>
+                {% for desc in test_descriptions %}
+                <tr>
+                    <td>{{ desc }}</td>
+                    <td>
+                        <input type="checkbox" name="test_results[]" value="{{ desc }}_ok" id="{{ desc }}_ok">
+                        <label for="{{ desc }}_ok">בסדר</label>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="2">
+                        <button type="button" class="all-ok-btn btn btn-success" onclick="markAllOk()">סמן הכל</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- תיבות סימון לממ"ש, ננ"ת, ננ"ש -->
+        <div class="form-group">
+            <div>
+                <input type="checkbox" name="item_statuses[]" value="מ'ש" id="memesh">
+                <label for="memesh">מ"ש</label>
+            </div>
+            <div>
+                <input type="checkbox" name="item_statuses[]" value="ננ'ת" id="nant">
+                <label for="nant">ננ"ת</label>
+            </div>
+            <div>
+                <input type="checkbox" name="item_statuses[]" value="ננ'ש" id="nansh">
+                <label for="nansh">ננ"ש</label>
+            </div>
+        </div>
+
+        <!-- חתימת מבצע -->
+        <div class="form-group">
+            <label>מבצע: <span style="color:red;">*</span></label>
+            <select name="performer" class="form-control" required>
+                {% for member in team_members %}
+                <option value="{{ member.name }} ({{ member.id_number }})">
+                    {{ member.name }} - {{ member.id_number }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary">שמור</button>
+    </form>
+    <a href="{{ url_for('product', serial_number=serial_number, sku=sku) }}" class="btn btn-secondary mt-3">חזור לפרטי מוצר</a>
+    <div id="success-alert" class="alert alert-success" role="alert" style="display: none;">
+        התג נשמר בהצלחה!
+    </div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/new_tag.js"></script>
+{% endblock %}

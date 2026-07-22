@@ -1,0 +1,30 @@
+.delete-btn {
+    background: linear-gradient(45deg, #d32f2f, #ef5350, #d32f2f);
+    background-size: 200% 200%;
+    border: none;
+    color: #ffffff;
+    animation: gradientMove 5s ease infinite;
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(45deg, #b71c1c, #d81b60, #b71c1c);
+    background-size: 200% 200%;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    animation: gradientMove 3s ease infinite;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+ 

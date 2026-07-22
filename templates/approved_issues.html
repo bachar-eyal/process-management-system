@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/approved_issues.css">
+<style>
+.solution-text {
+    white-space: pre-line;
+    line-height: 1.4;
+    margin-bottom: 5px;
+    padding: 5px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border-left: 3px solid #007bff;
+    font-size: 14px;
+}
+
+.solution-text br {
+    margin-bottom: 3px;
+}
+
+/* עיצוב עמודות הטבלה */
+.table th:nth-child(1) {
+    width: 40%;
+}
+
+.table th:nth-child(2) {
+    width: 45%;
+}
+
+.table th:nth-child(3) {
+    width: 15%;
+}
+
+.table td:nth-child(2) {
+    word-wrap: break-word;
+    max-width: 0;
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <a href="{{ url_for('main_index') }}" class="btn btn-secondary mb-3">חזור לעמוד הראשי</a>
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1>רשימת תקלות מאושרות</h1>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>הוסף תקלה חדשה</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="form-inline">
+                <div class="form-group mb-2 mr-2">
+                    <input type="text" name="description" id="description" class="form-control" placeholder="תיאור תקלה" required>
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <textarea name="solution" id="solution" class="form-control" placeholder="המלצה לפתרון (אופציונלי)" rows="2" style="width: 300px;"></textarea>
+                </div>
+                <button type="submit" name="add_issue" class="btn btn-primary mb-2">הוסף</button>
+            </form>
+            </div>
+</div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>כל התקלות המאושרות</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>תיאור תקלה</th>
+                        <th>המלצה לפתרון</th>
+                        <th>מחיקה</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for issue in issues %}
+                    <tr>
+                        <td>{{ issue[2] if issue[2] else '-' }}</td>
+                        <td>
+                            {% if issue[3] %}
+                                <div class="solution-text">{{ issue[3]|replace('\n', '<br>')|safe }}</div>
+                                <button type="button" class="btn btn-sm btn-outline-primary edit-solution-btn ml-2" 
+                                        data-issue-id="{{ issue[0] }}" 
+                                        data-current-solution="{{ issue[3] }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn btn-sm btn-outline-primary edit-solution-btn" 
+                                        data-issue-id="{{ issue[0] }}" 
+                                        data-current-solution="">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" name="delete_issue" class="btn btn-danger btn-sm delete-btn" data-issue-id="{{ issue[0] }}">מחק</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for editing solution -->
+<div class="modal fade" id="editSolutionModal" tabindex="-1" role="dialog" aria-labelledby="editSolutionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editSolutionModalLabel">
+                    <i class="fas fa-edit mr-2"></i>
+                    עריכת המלצה לפתרון
+                </h5>
+            </div>
+            <div class="modal-body">
+                <form id="editSolutionForm">
+                    <input type="hidden" id="editIssueId" name="issue_id">
+                    <div class="form-group">
+                        <label for="editSolutionText">המלצה לפתרון:</label>
+                        <textarea class="form-control" id="editSolutionText" name="solution" rows="6" 
+                                  placeholder="הכנס את המלצת הפתרון לתקלה זו..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">ביטול</button>
+                <button type="button" class="btn btn-primary" id="saveSolutionBtn">
+                    <i class="fas fa-save mr-1"></i>
+                    שמור
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/approved_issues.js"></script>
+{% endblock %} 

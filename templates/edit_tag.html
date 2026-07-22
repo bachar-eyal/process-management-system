@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/edit_tag.css">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div style="text-align: center;">
+        <h1>תג תהליך עבור {{ tag[1] }}</h1>
+    </div>
+    <form method="POST">
+        <div class="form-group">
+            <label>תקלה נבחרת:</label>
+            <input type="text" class="form-control" value="{{ fault_parts[0] }}" readonly>
+        </div>
+        <div class="form-group">
+            <label>פרטים נוספים על התקלה:</label>
+            <textarea name="additional_description" class="form-control" style="margin-top: 10px;">{{ '\n'.join(fault_parts[1:]) if fault_parts|length > 1 else '' }}</textarea>
+        </div>
+        <div class="form-group checkbox-inline">
+            <label for="is_verified_fault">תקלה מאומתת:</label>
+            <input type="checkbox" name="is_verified_fault" value="כן" id="is_verified_fault" {% if is_verified_fault == "כן" %}checked{% endif %}>
+        </div>
+        <div class="form-group">
+            <label>פעולות שבוצעו (היסטוריה - לקריאה בלבד):</label>
+            <textarea name="actions_taken" class="form-control" rows="5" readonly>{{ tag[3] if tag[3] else '' }}</textarea>
+            <br>
+            <label>פעולה חדשה (תאריך יתווסף אוטומטית):</label>
+            <textarea name="new_action" class="form-control" rows="1" placeholder="הזן פעולה חדשה כאן"></textarea>
+        </div>
+        <div class="form-group">
+            <label>סטטוס:</label>
+            <select name="status" class="form-control">
+                <option value="בטיפול" {% if tag[4] == "בטיפול" %}selected{% endif %}>בטיפול</option>
+                <option value="ממתין לחלקים" {% if tag[4] == "ממתין לחלקים" %}selected{% endif %}>ממתין לחלקים</option>
+                <option value="ממתין לאישור" {% if tag[4] == "ממתין לאישור" %}selected{% endif %}>ממתין לאישור</option>
+                <option value="הושלם" {% if tag[4] == "הושלם" %}selected{% endif %}>הושלם</option>
+            </select>
+        </div>
+        <br>
+        <button type="submit" class="btn btn-primary">שמור</button>
+    </form>
+
+    <!-- קטע צריכת חלפים -->
+    <div class="spare-parts-section mt-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">🔧 צריכת חלפים</h4>
+                <button type="button" class="btn btn-success btn-sm" onclick="showAddSpareModal()">
+                    <i class="fas fa-plus"></i> הוסף חלק חילוף
+                </button>
+            </div>
+            <div class="card-body">
+                {% if used_parts %}
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>מספר חלק</th>
+                            <th>תיאור</th>
+                            <th>ייצרן</th>
+                            <th>מספר סידורי</th>
+                            <th>תאריך שימוש</th>
+                            <th>פעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usedPartsTable">
+                        {% for part in used_parts %}
+                        <tr data-usage-id="{{ part[0] }}">
+                            <td class="part-number-cell">
+                                <span class="part-badge">{{ part[1] }}</span>
+                            </td>
+                            <td class="description-cell">{{ part[2] if part[2] else '-' }}</td>
+                            <td class="manufacturer-cell">{{ part[3] if part[3] else '-' }}</td>
+                            <td class="serial-cell">
+                                <span class="serial-badge">{{ part[4] }}</span>
+                            </td>
+                            <td class="date-cell">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock mr-1"></i>{{ part[5][:16] }}
+                                </small>
+                            </td>
+                            <td class="actions-cell">
+                                <button type="button" class="btn btn-danger btn-sm delete-usage-btn" onclick="deleteSpareUsage({{ part[0] }})">
+                                    <i class="fas fa-trash mr-1"></i>מחק
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted text-center">לא נעשה שימוש בחלקי חילוף עדיין</p>
+                <div id="usedPartsTable" style="display: none;">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>מספר חלק</th>
+                                <th>תיאור</th>
+                                <th>ייצרן</th>
+                                <th>מספר סידורי</th>
+                                <th>תאריך שימוש</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal להוספת חלק חילוף -->
+    <div class="modal fade" id="addSpareModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">הוספת חלק חילוף</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="addSpareForm">
+                        <div class="form-group">
+                            <label for="spare_part_select">בחר חלק חילוף:</label>
+                            <select class="form-control" id="spare_part_select" required>
+                                <option value="">-- בחר חלק --</option>
+                                {% for part in spare_parts %}
+                                <option value="{{ part[0] }}">{{ part[1] }}{% if part[2] %} - {{ part[2] }}{% endif %}{% if part[3] %} ({{ part[3] }}){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="spare_serial_number">מספר סידורי של החלק:</label>
+                            <input type="text" class="form-control" id="spare_serial_number" placeholder="הזן מספר סידורי" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">ביטול</button>
+                    <button type="button" class="btn btn-primary" onclick="addSpareUsage()">הוסף</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <a href="{{ url_for('product', serial_number=tag[1], sku=sku) }}" class="btn btn-secondary mt-3">חזור לפרטי מוצר</a>
+    <div id="success-alert" class="alert alert-success" role="alert" style="display: none;">
+        התג עודכן בהצלחה!
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/edit_tag.js"></script>
+{% endblock %}

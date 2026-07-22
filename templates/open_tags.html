@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/datatables.min.css">
+<link rel="stylesheet" href="/static/css/open_tags.css">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <a href="{{ url_for('main_index') }}" class="btn btn-secondary mb-3">חזור לעמוד הראשי</a>
+    <div style="text-align: center;">
+        <h1>צפייה בתגי תהליך</h1>
+    </div>
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+    <form method="POST" action="{{ url_for('open_tags') }}">
+        <div class="form-group">
+            <label>חיפוש תג לפי מספר סידורי:</label>
+            <input type="text" class="form-control" name="qr_code" placeholder="הזן מספר סידורי" value="{{ qr_code if qr_code else '' }}" autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary">חפש היסטוריה</button>
+        <button type="submit" class="btn btn-secondary" onclick="this.form.querySelector('input[name=qr_code]').value=''; 
+        this.form.submit();">איפוס</button>
+    </form>
+    {% if tags %}
+    <table id="tagsTable" class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>פעולות</th>
+                <th>מספר סידורי</th>
+                <th>מק"ט</th>
+                <th>תיאור תקלה</th>
+                <th>פעולות שבוצעו</th>
+                <th>תאריך</th>
+                <th>ימים פתוחים</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tag in tags %}
+            <tr>
+                <td class="actions-cell">
+                    <a href="{{ url_for('edit_tag', tag_id=tag[0]) }}" class="btn btn-sm btn-warning">ערוך</a>
+                    <a href="{{ url_for('close_tag', serial_number=tag[1], sku=tag[11]) }}" class="btn btn-sm btn-danger">סגור</a>
+                </td>
+                <td><a href="{{ url_for('product', serial_number=tag[1], sku=tag[11]) }}">{{ tag[1] }}</a></td>
+                <td class="no-wrap">{{ tag[11] }}</td>
+                <td>
+                    {% if tag[2] %}
+                        {% set fault_parts = tag[2].split('\n') %}
+                        {% if fault_parts|length > 1 %}
+                            <strong>{{ fault_parts[0] }}</strong><br>
+                            {% for part in fault_parts[1:] if part|trim %}
+                                {{ part|trim }}<br>
+                            {% endfor %}
+                        {% else %}
+                            {{ tag[2] }}
+                        {% endif %}
+                    {% else %}
+                        ללא תיאור
+                    {% endif %}
+                </td>
+                <td class="actions-cell">
+                    {% if tag[3] %}
+                        {% set actions = tag[3].split('\n') %}
+                        {% for action in actions if action|trim %}
+                            {{ action|trim }}<br>
+                        {% endfor %}
+                    {% else %}
+                        ללא פעולות
+                    {% endif %}
+                </td>
+                <td>{{ tag[12] }}</td>
+                <td>
+                    {{ tag[13] if tag[13] != 'לא זמין' else 'לא זמין' }} ימים
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted mt-3">אין תגים פתוחים.</p>
+    {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/open_tags.js"></script>
+<script src="/static/datatables.min.js"></script>
+<!-- DataTables Bootstrap integration included in datatables.min.js -->
+{% endblock %}

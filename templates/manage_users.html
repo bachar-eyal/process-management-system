@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול משתמשים</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/fontawesome.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .manage-users-container {
+            max-width: 600px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px 30px 30px 30px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 1s;
+        }
+        h2 {
+            text-align: center;
+            color: #22223b;
+            margin-bottom: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        table {
+            width: 100%;
+            background: #f8fafc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            text-align: center;
+            padding: 10px;
+        }
+        th {
+            background: #e0e7ff;
+            color: #6366f1;
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background: #f1f5f9; }
+        .btn-delete {
+            background: linear-gradient(90deg, #fca5a5 0%, #f87171 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 6px 18px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-delete:hover {
+            background: linear-gradient(90deg, #f87171 0%, #fca5a5 100%);
+            transform: scale(1.05);
+        }
+        .no-users {
+            text-align: center;
+            color: #888;
+            margin-top: 20px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script>
+        function confirmDelete(form) {
+            if(confirm('האם אתה בטוח שברצונך למחוק משתמש זה?')) {
+                form.submit();
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="manage-users-container">
+        <h2>ניהול משתמשים</h2>
+        {% if users and users|length > 0 %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>שם משתמש</th>
+                    <th>הרשאה</th>
+                    <th>מחיקה</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user[1] }}</td>
+                    <td>{{ 'מנהל' if user[2]=='admin' else 'משתמש רגיל' }}</td>
+                    <td>
+                        <form method="post" style="display:inline;" onsubmit="event.preventDefault(); confirmDelete(this);">
+                            <input type="hidden" name="user_id" value="{{ user[0] }}">
+                            <button type="submit" class="btn btn-delete"><i class="fas fa-trash"></i> מחק</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-users">אין משתמשים למחוק.</div>
+        {% endif %}
+        <a href="/" class="btn btn-secondary w-100 mt-3" style="border-radius:8px; font-weight:600; font-size:1rem;"><i class="fas fa-home ml-2"></i> חזור לדף הבית</a>
+    </div>
+</body>
+</html> 

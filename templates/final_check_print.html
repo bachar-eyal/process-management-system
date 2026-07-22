@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>הדפסת בדיקות סופיות - תג {{ tag_id }}</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/fontawesome.min.css">
+    <style>
+        body {
+            background: #f8fafc;
+            margin: 0;
+            font-family: 'Assistant', 'Rubik', sans-serif;
+        }
+        .print-wrapper {
+            max-width: 960px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.12);
+            padding: 32px;
+        }
+        .print-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .print-header h1 {
+            font-size: 1.8rem;
+            color: #1f2937;
+            margin: 0;
+        }
+        .print-meta {
+            color: #4b5563;
+            font-weight: 600;
+        }
+        .snapshot-frame {
+            border: 3px solid #4f46e5;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #eef2ff 0%, #c7d2fe 100%);
+            padding: 16px;
+        }
+        .snapshot-frame img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .actions .btn {
+            min-width: 140px;
+            font-weight: 600;
+        }
+        @media print {
+            body {
+                background: #ffffff;
+            }
+            .print-wrapper {
+                box-shadow: none;
+                border-radius: 0;
+                margin: 0;
+                width: 100%;
+                padding: 0;
+            }
+            .print-header,
+            .actions {
+                display: none !important;
+            }
+            .snapshot-frame {
+                border: none;
+                background: transparent;
+                padding: 0;
+            }
+            .snapshot-frame img {
+                box-shadow: none;
+                border-radius: 0;
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-wrapper">
+        <div class="print-header">
+            <h1>דף בדיקות סופיות</h1>
+            <div class="print-meta">
+                <div>תג: {{ tag_id }}</div>
+                <div>מספר סידורי: {{ serial_number }}</div>
+                <div>מק"ט: {{ sku }}</div>
+            </div>
+        </div>
+        <div class="snapshot-frame">
+            <img src="{{ snapshot_url }}" alt="דף בדיקות סופיות שנשמר" />
+        </div>
+        <div class="actions">
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print mr-1"></i> הדפס
+            </button>
+            <a class="btn btn-secondary" href="{{ url_for('product', serial_number=serial_number, sku=sku) }}">
+                <i class="fas fa-arrow-right mr-1"></i> חזרה לפרטי מוצר
+            </a>
+        </div>
+    </div>
+    <script>
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                window.close();
+            }
+        });
+    </script>
+</body>
+</html>
+
